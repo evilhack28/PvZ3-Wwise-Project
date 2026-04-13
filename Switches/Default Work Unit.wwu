@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{03A3BD32-B769-4034-9DA6-7388B164CAB4}" SchemaVersion="119">
+	<Switches>
+		<WorkUnit Name="Default Work Unit" ID="{03A3BD32-B769-4034-9DA6-7388B164CAB4}" PersistMode="Standalone">
+			<ChildrenList>
+				<SwitchGroup Name="_2734521239" ID="{DE52D181-8568-4B1E-9C88-BAF54427555A}">
+					<Comment>2734521239</Comment>
+					<ChildrenList>
+						<Switch Name="Active" ID="{3226BF88-D36B-4087-9594-50135B53C195}">
+							<Comment>58138747</Comment>
+						</Switch>
+						<Switch Name="Inactive" ID="{68351D8C-E602-47B4-9820-94BF57428117}">
+							<Comment>3163453698</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_3308163771" ID="{7F81F7B4-5AD7-4281-8FFC-26AF8DFD012E}">
+					<Comment>3308163771</Comment>
+					<ChildrenList>
+						<Switch Name="_625523254" ID="{BDB41840-DECC-450D-ADC4-179262DAD915}">
+							<Comment>625523254</Comment>
+						</Switch>
+						<Switch Name="_701609476" ID="{8348A38E-5846-4703-BA31-2EFD34D0538B}">
+							<Comment>701609476</Comment>
+						</Switch>
+						<Switch Name="_3752256195" ID="{1EBFED63-57B8-4321-B9BC-4C5A2C6E54D9}">
+							<Comment>3752256195</Comment>
+						</Switch>
+						<Switch Name="_3697766618" ID="{A835658F-F555-4B0F-8673-D6FB872FC57C}">
+							<Comment>3697766618</Comment>
+						</Switch>
+						<Switch Name="_526108027" ID="{A2B5E33A-1FAA-413B-9859-23F39B64B089}">
+							<Comment>526108027</Comment>
+						</Switch>
+						<Switch Name="_1924138332" ID="{DDBD896B-9DBE-4C94-9EFA-C636AFF1D246}">
+							<Comment>1924138332</Comment>
+						</Switch>
+						<Switch Name="_3963272534" ID="{7CFCF6F4-387D-4FE6-83E7-B9B0565C4B36}">
+							<Comment>3963272534</Comment>
+						</Switch>
+						<Switch Name="_517423797" ID="{77FA2F05-D46A-4CC6-ACFA-FBA8545FF63A}">
+							<Comment>517423797</Comment>
+						</Switch>
+						<Switch Name="_390557464" ID="{99CE0770-3016-42FB-8147-60F335631424}">
+							<Comment>390557464</Comment>
+						</Switch>
+						<Switch Name="_1142371058" ID="{AF35D6E6-5D7C-4CE7-96BF-41AECBBF263B}">
+							<Comment>1142371058</Comment>
+						</Switch>
+						<Switch Name="_494451031" ID="{BFD6877B-7C17-436B-A114-9C9805B0E09F}">
+							<Comment>494451031</Comment>
+						</Switch>
+						<Switch Name="_746514479" ID="{CB5562E4-0060-4D6C-B63F-1035A3B67E81}">
+							<Comment>746514479</Comment>
+						</Switch>
+						<Switch Name="bigWaveBeach" ID="{0300D0FE-D6A0-4311-AE01-967004B6D54A}">
+							<Comment>1702368071</Comment>
+						</Switch>
+						<Switch Name="_2015809792" ID="{6B5F4E30-A853-4306-9FAA-897776650024}">
+							<Comment>2015809792</Comment>
+						</Switch>
+						<Switch Name="Park" ID="{9F3CA986-499D-43B9-A6C6-15AEE3A75840}">
+							<Comment>1610254009</Comment>
+						</Switch>
+						<Switch Name="_3523002949" ID="{0AA79CB5-782C-4A53-AE05-BAEE0319F7BC}">
+							<Comment>3523002949</Comment>
+						</Switch>
+						<Switch Name="_1014300310" ID="{CE68D7D5-6828-48F9-8B94-61FFD1C42CA1}">
+							<Comment>1014300310</Comment>
+						</Switch>
+						<Switch Name="_1241702692" ID="{CFEE2195-739D-459B-9AFE-CA72222654F4}">
+							<Comment>1241702692</Comment>
+						</Switch>
+						<Switch Name="_4155362068" ID="{F5DDC557-B3FD-44FD-B8A5-5F6B5DAC2FAE}">
+							<Comment>4155362068</Comment>
+						</Switch>
+						<Switch Name="Jungle" ID="{71E97502-A77C-4CA2-A75E-6F237070841A}">
+							<Comment>219304270</Comment>
+						</Switch>
+						<Switch Name="_1708190387" ID="{1D8C6EFC-3FF1-4288-ACEC-4802982B82EC}">
+							<Comment>1708190387</Comment>
+						</Switch>
+						<Switch Name="Urban" ID="{69F03C24-3124-44B0-9A9E-B8A41F235402}">
+							<Comment>2997730343</Comment>
+						</Switch>
+						<Switch Name="_1745658195" ID="{4FFE8A91-87A8-41E0-A103-8B3043F73187}">
+							<Comment>1745658195</Comment>
+						</Switch>
+						<Switch Name="_2683920390" ID="{2115C334-5278-4A99-ADF5-51F092508797}">
+							<Comment>2683920390</Comment>
+						</Switch>
+						<Switch Name="Sewers" ID="{5860ABFA-664F-4904-96BD-363411641766}">
+							<Comment>3390261832</Comment>
+						</Switch>
+						<Switch Name="neutral" ID="{59E970D2-A26F-4CD3-8BE2-D14ECE40674B}">
+							<Comment>670611050</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_3202799953" ID="{5FCABD41-0134-4CC4-90E4-2C99BCEE7A9B}">
+					<Comment>3202799953</Comment>
+					<ChildrenList>
+						<Switch Name="Day" ID="{4F9C719C-2AA9-4326-96C3-825055CEF1E3}">
+							<Comment>311764537</Comment>
+						</Switch>
+						<Switch Name="Night" ID="{95E95772-2A51-4388-8431-F8C96681CF47}">
+							<Comment>1011622525</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_2505245191" ID="{163C5BD8-A17C-4DCD-A9DB-CFDDA62E7B54}">
+					<Comment>2505245191</Comment>
+					<ChildrenList>
+						<Switch Name="true" ID="{E9D44C95-4455-478D-AD0B-AB08FAA35ACF}">
+							<Comment>3053630529</Comment>
+						</Switch>
+						<Switch Name="false" ID="{93A84D38-6466-401F-BF0A-22A663E559FF}">
+							<Comment>2452206122</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="None_mean_748895195" ID="{23C8A87A-BECB-4B75-B6D4-A0043DA91476}"/>
+				<SwitchGroup Name="_2794100953" ID="{B5D1DBDA-5929-49DC-96AF-DD2F82B7752F}">
+					<ChildrenList>
+						<Switch Name="Silver" ID="{95BD004F-17A1-4D6D-8AAA-653B38C8B262}">
+							<Comment>3549509570</Comment>
+						</Switch>
+						<Switch Name="Gold" ID="{7D673854-A188-4B44-9BEB-3DC74550376B}">
+							<Comment>651855279</Comment>
+						</Switch>
+						<Switch Name="magical" ID="{868089B8-72BB-4E10-B659-57F78131918E}">
+							<Comment>95296157</Comment>
+						</Switch>
+						<Switch Name="giant" ID="{1734E0AE-6548-4B97-A88D-28FC68D57807}">
+							<Comment>1602974396</Comment>
+						</Switch>
+						<Switch Name="_1447104068" ID="{81A6E478-B282-442D-AA51-DB13CDEC2268}">
+							<Comment>1447104068</Comment>
+						</Switch>
+						<Switch Name="epic" ID="{759D5226-25D9-4536-BB18-0DA3E892AC0E}">
+							<Comment>564986154</Comment>
+						</Switch>
+						<Switch Name="Legendary" ID="{BA5E5542-6BC6-48B9-AFD6-EA4D233655FA}">
+							<Comment>3816150932</Comment>
+						</Switch>
+						<Switch Name="Wooden" ID="{105FA46C-E466-4D24-A970-9287D86176C4}">
+							<Comment>1116553775</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_2260191056" ID="{378D1E96-EDB3-474E-A577-484DB553EF14}">
+					<Comment>2260191056</Comment>
+					<ChildrenList>
+						<Switch Name="Coins" ID="{526DB4E4-E897-4BE0-B9E1-F44AC0A463E8}">
+							<Comment>2936699729</Comment>
+						</Switch>
+						<Switch Name="seeds" ID="{7F2597B2-5CB1-493A-8D01-0788C3495A9B}">
+							<Comment>3750040961</Comment>
+						</Switch>
+						<Switch Name="Pinata" ID="{4DB6F719-1904-4767-A1C1-978FA9DDB69B}">
+							<Comment>1652234002</Comment>
+						</Switch>
+						<Switch Name="Gems" ID="{C43B24E6-103D-42C0-9FD6-5EB44AB55E99}">
+							<Comment>1239954461</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_920444701" ID="{8A8AF7C2-3251-47A4-91EA-AE30BB78EB64}">
+					<Comment>920444701</Comment>
+					<ChildrenList>
+						<Switch Name="rewire" ID="{A656AFBD-8072-4A69-885D-8E3688161987}">
+							<Comment>2142882897</Comment>
+						</Switch>
+						<Switch Name="_4287565811" ID="{CB85983C-08F8-4B78-808B-63F9EBBC604C}">
+							<Comment>4287565811</Comment>
+						</Switch>
+						<Switch Name="_3480361467" ID="{09C759AC-08BF-4B1E-A3E5-E6E9DE368842}">
+							<Comment>3480361467</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_1063308635" ID="{FC9119D8-16BF-4382-BA0B-5D37C2093F88}">
+					<Comment>1063308635</Comment>
+					<ChildrenList>
+						<Switch Name="Happy" ID="{ECD6E116-0CAF-4F2B-A00F-3D4C87BC7A23}">
+							<Comment>1427264549</Comment>
+						</Switch>
+						<Switch Name="Tired" ID="{5B0239B8-6F2F-405E-AC56-712B95BE8208}">
+							<Comment>3386657621</Comment>
+						</Switch>
+						<Switch Name="Excited" ID="{76AC2943-C985-40BA-9BE1-79CA7203387B}">
+							<Comment>2633337909</Comment>
+						</Switch>
+						<Switch Name="Scared" ID="{27DB6E1B-9A80-41E9-9EAA-79E63F83ADB9}">
+							<Comment>820940617</Comment>
+						</Switch>
+						<Switch Name="DEFAULT" ID="{D0890FC5-D10A-444B-96B1-6D434F96A39B}">
+							<Comment>782826392</Comment>
+						</Switch>
+						<Switch Name="Confused" ID="{51E545C2-1756-48C0-90B2-0E4FAC60048B}">
+							<Comment>381301996</Comment>
+						</Switch>
+						<Switch Name="Angry" ID="{BE7023FA-E588-4CF3-8178-4A5CD241E303}">
+							<Comment>1206605712</Comment>
+						</Switch>
+						<Switch Name="sneaky" ID="{CD84AE74-C8F9-48E3-9A84-A2D9019F499F}">
+							<Comment>468648200</Comment>
+						</Switch>
+						<Switch Name="Sad" ID="{4F179ACE-A58F-4F1A-ACEB-ACBD6F94643F}">
+							<Comment>443572635</Comment>
+						</Switch>
+						<Switch Name="nervous" ID="{A713411C-DFA3-43C7-AC2D-894A12F35722}">
+							<Comment>1717373301</Comment>
+						</Switch>
+						<Switch Name="Annoyed" ID="{5B2081E6-ECF9-4A68-8315-E3FB96FC1B9B}">
+							<Comment>1194639741</Comment>
+						</Switch>
+						<Switch Name="_4110439188" ID="{EEAB4AA8-506C-443B-983D-B94123BA40D3}">
+							<Comment>4110439188</Comment>
+						</Switch>
+						<Switch Name="_1573109334" ID="{4F5FDC90-2A0E-4D6B-ABED-54712B3E2561}">
+							<Comment>1573109334</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_3125411419" ID="{F8C85095-37F3-499C-8611-ECE59D849EE0}">
+					<Comment>3125411419</Comment>
+					<ChildrenList>
+						<Switch Name="crazydave" ID="{FAEB5451-FF59-453C-932F-D87F8C44F2C7}">
+							<Comment>750148070</Comment>
+						</Switch>
+						<Switch Name="Sunflower" ID="{425F6633-9871-4A4E-8A52-A1F51C272569}">
+							<Comment>1922697424</Comment>
+						</Switch>
+						<Switch Name="Penny" ID="{B353581F-1539-42DA-AF9E-B95DDD2C8F1F}">
+							<Comment>555943885</Comment>
+						</Switch>
+						<Switch Name="Zomboss" ID="{AF58E1E4-17F2-45F4-8D91-B7D12BE8C415}">
+							<Comment>4280723754</Comment>
+						</Switch>
+						<Switch Name="magicbeans" ID="{BDD7FB88-C3CC-4DBC-BDD6-DFAA45318DC1}">
+							<Comment>1665182567</Comment>
+						</Switch>
+						<Switch Name="Peashooter" ID="{F47CB898-9B37-4E07-959B-25EED98F4953}">
+							<Comment>1091902251</Comment>
+						</Switch>
+						<Switch Name="BonkChoy" ID="{134EB80A-4A80-4091-9714-309B79356450}">
+							<Comment>472339668</Comment>
+						</Switch>
+						<Switch Name="Wallnut" ID="{F134CE16-2366-4A94-9641-F8F03B4F03DA}">
+							<Comment>204066234</Comment>
+						</Switch>
+						<Switch Name="_4003154661" ID="{1F80EEBD-62F5-46B2-A177-EEF16BC33914}">
+							<Comment>4003154661</Comment>
+						</Switch>
+						<Switch Name="_3098937221" ID="{21556B4D-D2E8-4145-97B8-5D3700730F9C}">
+							<Comment>3098937221</Comment>
+						</Switch>
+						<Switch Name="Cabbagepult" ID="{A665017D-C363-45C1-9C3F-3E69FEAC13A3}">
+							<Comment>4016122815</Comment>
+						</Switch>
+						<Switch Name="_3927962823" ID="{8960533B-65C2-4B41-82B2-8C7A8315A2C3}">
+							<Comment>3927962823</Comment>
+						</Switch>
+						<Switch Name="_1746580743" ID="{F9A3039D-0C23-4AE1-80C4-8057F1F09484}">
+							<Comment>1746580743</Comment>
+						</Switch>
+						<Switch Name="_864957875" ID="{7AD1BC60-16ED-41D8-9B4A-CD2015309E9D}">
+							<Comment>864957875</Comment>
+						</Switch>
+						<Switch Name="_1056372126" ID="{48003F66-FCAD-46A2-A88D-339AC87C6660}">
+							<Comment>1056372126</Comment>
+						</Switch>
+						<Switch Name="Narrator" ID="{B72BC978-011E-4BDF-88DF-668A57CCD791}">
+							<Comment>3272864290</Comment>
+						</Switch>
+						<Switch Name="Douglas" ID="{EFCA1561-AB77-4E9F-82BD-16A031693F4F}">
+							<Comment>3869703142</Comment>
+						</Switch>
+						<Switch Name="Patrice" ID="{07E04956-3CF6-44C4-9BCF-6A0F800A3CBB}">
+							<Comment>4073287343</Comment>
+						</Switch>
+						<Switch Name="Mo" ID="{88061968-04BB-407F-A9F2-B0ADA989A82C}">
+							<Comment>1685527065</Comment>
+						</Switch>
+						<Switch Name="tugboat" ID="{EC4ADB89-B8D4-41CC-A366-1B80E649498D}">
+							<Comment>2393787613</Comment>
+						</Switch>
+						<Switch Name="Twister" ID="{EC0076C8-3CA4-4D69-86D3-0E4452A5BCE9}">
+							<Comment>275875467</Comment>
+						</Switch>
+						<Switch Name="_4088291288" ID="{F2D12FBB-872C-4F8C-A760-0829E24784A6}">
+							<Comment>4088291288</Comment>
+						</Switch>
+						<Switch Name="Nate" ID="{9464EFC0-4AE1-4772-89C7-D21ACF26E1A7}">
+							<Comment>915097331</Comment>
+						</Switch>
+						<Switch Name="snoozy" ID="{6CB84718-D596-4961-8BDA-9EABFAC84B2D}">
+							<Comment>4081168259
+</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+				<SwitchGroup Name="_3176635419" ID="{C0F35747-84E8-4A36-8330-2E548FAC244E}">
+					<Comment>3176635419</Comment>
+					<ChildrenList>
+						<Switch Name="Miniboss" ID="{E4C18F42-943D-43F2-985D-6D0E128452F7}">
+							<Comment>2587700427</Comment>
+						</Switch>
+						<Switch Name="_3263994806" ID="{5773AC6A-8C2E-4FD7-857F-AAE5CD9B70F7}">
+							<Comment>3263994806</Comment>
+						</Switch>
+					</ChildrenList>
+				</SwitchGroup>
+			</ChildrenList>
+		</WorkUnit>
+	</Switches>
+</WwiseDocument>

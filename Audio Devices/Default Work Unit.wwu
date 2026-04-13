@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{C4FCB4A3-30C6-4D73-AD24-1C7D5C3AA9B5}" SchemaVersion="119">
+	<AudioDevices>
+		<WorkUnit Name="Default Work Unit" ID="{C4FCB4A3-30C6-4D73-AD24-1C7D5C3AA9B5}" PersistMode="Standalone">
+			<ChildrenList>
+				<AudioDevice Name="System" ID="{75EFFE1F-BF44-45BC-99A1-002D5825D732}" PluginName="System" CompanyID="0" PluginID="174" PluginType="7">
+					<Comment>3859886410</Comment>
+				</AudioDevice>
+				<AudioDevice Name="No_Output" ID="{F02ABEA1-F54F-48EF-B35A-5EC43D0DEF0F}" PluginName="No Output" CompanyID="0" PluginID="181" PluginType="7"/>
+				<AudioDevice Name="test" ID="{281597A2-E003-494E-9582-BFC697654B12}" PluginName="DVR Bypass" CompanyID="0" PluginID="175" PluginType="7"/>
+			</ChildrenList>
+		</WorkUnit>
+	</AudioDevices>
+</WwiseDocument>

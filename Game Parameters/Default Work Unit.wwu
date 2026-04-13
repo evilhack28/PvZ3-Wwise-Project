@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{DBC2A4A9-623D-4FF5-82CF-B7380FBB65FF}" SchemaVersion="119">
+	<GameParameters>
+		<WorkUnit Name="Default Work Unit" ID="{DBC2A4A9-623D-4FF5-82CF-B7380FBB65FF}" PersistMode="Standalone">
+			<ChildrenList>
+				<Folder Name="SS_AIR" ID="{708EACED-F8B5-4EF2-8722-F237AAA4BA86}" ShortID="659201378">
+					<ChildrenList>
+						<GameParameter Name="SS_AIR_FEAR" ID="{52BEEC12-5D5C-48DD-B7B5-8EA510DDFFF3}">
+							<Comment>1351367891</Comment>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_FREEFALL" ID="{EFE68F1F-B7F8-4A11-AF90-DC992C3A4CBB}">
+							<Comment>3002758120</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="75"/>
+							</PropertyList>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_PRESENCE" ID="{675FB572-D2BB-4E49-B9FD-67CEC641A8AF}">
+							<Comment>3847924954</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="75"/>
+							</PropertyList>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_FURY" ID="{20BAB0AF-A090-473D-BD4D-AFA452D8CFDB}">
+							<Comment>1029930033</Comment>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_TIMEOFDAY" ID="{B58FF6FB-8009-4B48-8BC6-87E26AADDBB3}">
+							<Comment>3203397129</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="6"/>
+							</PropertyList>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_TURBULENCE" ID="{522D9505-B324-45BF-ADAE-CB83729B8D89}">
+							<Comment>4160247818</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="6"/>
+							</PropertyList>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_SIZE" ID="{D6125D47-5BD4-40B4-9D84-51E26D4F630C}">
+							<Comment>3074696722</Comment>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_RPM" ID="{9DC78AB1-4A07-440F-A47C-80C235A7F274}">
+							<Comment>822163944</Comment>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_STORM" ID="{B4226958-E69B-4D38-93E9-3FEE5093AA12}">
+							<Comment>3715662592</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="75"/>
+							</PropertyList>
+						</GameParameter>
+						<GameParameter Name="SS_AIR_MONTH" ID="{C64FC088-F9A0-4323-8434-50C5F28EA779}">
+							<Comment>2648548617</Comment>
+							<PropertyList>
+								<Property Name="InitialValue" Type="Real64" Value="6"/>
+							</PropertyList>
+						</GameParameter>
+					</ChildrenList>
+				</Folder>
+				<GameParameter Name="_3239745623" ID="{F69BD6BD-B233-4FA6-AB36-DB42BB803E8E}"/>
+				<GameParameter Name="_234334960" ID="{B182260A-CD95-4A32-A987-9EB0B74EA82D}">
+					<Comment>234334960</Comment>
+				</GameParameter>
+				<GameParameter Name="_665269705" ID="{A15BC38D-67F9-42A4-A51D-24D104207929}"/>
+				<GameParameter Name="_913070258" ID="{A727A588-5A4B-4B70-BBA1-D6878E8F0BE9}">
+					<Comment>913070258</Comment>
+				</GameParameter>
+				<GameParameter Name="_1560925592" ID="{922A1E6B-CC06-4127-A4AA-4A02FCA84DE6}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="1"/>
+					</PropertyList>
+				</GameParameter>
+				<GameParameter Name="_2350240842" ID="{D2A1E818-74F2-4DA3-B792-EC2A67FB792B}">
+					<Comment>2350240842</Comment>
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="100"/>
+					</PropertyList>
+				</GameParameter>
+				<GameParameter Name="_2760037741" ID="{471A950F-5209-4BB3-A4BE-8D2683F52E38}">
+					<Comment>2760037741</Comment>
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="25"/>
+					</PropertyList>
+				</GameParameter>
+				<GameParameter Name="_2803734810" ID="{BA613A68-A69A-408C-9AAD-C928A4DC0EDA}">
+					<Comment>2803734810</Comment>
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="100"/>
+					</PropertyList>
+				</GameParameter>
+				<GameParameter Name="_3103374327" ID="{0806790B-6B9B-42DC-BA5E-9EA976606236}">
+					<Comment>3103374327</Comment>
+				</GameParameter>
+				<GameParameter Name="_3168828037" ID="{DE701644-AF7C-4F36-B8AD-D24D4682D6FC}">
+					<Comment>3168828037</Comment>
+				</GameParameter>
+				<GameParameter Name="_3224341500" ID="{5CC654A2-175F-4876-B1FC-048761212D60}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="1"/>
+					</PropertyList>
+				</GameParameter>
+				<GameParameter Name="_4144080943" ID="{BEEEC319-F1AC-484F-935F-0D6C54695DC7}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="0.5"/>
+					</PropertyList>
+				</GameParameter>
+			</ChildrenList>
+		</WorkUnit>
+	</GameParameters>
+</WwiseDocument>

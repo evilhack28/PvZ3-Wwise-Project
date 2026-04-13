@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectInfo>
+	<Project Name="PvZ3-Wwise-Full-Project" GUID="{71164E65-F581-4668-AC3E-BCF6F4458A4A}" Generator="2023.1.19.8928"/>
+	<CacheRoot>../.cache</CacheRoot>
+	<Platforms>
+		<Platform Name="Android" GUID="{1EE13D38-2D81-4BF7-AFF5-501B0B203E68}" BasePlatform="Android" BasePlatformGUID="{A2D401DE-B8B6-4FEB-8142-137C34D507CA}" Path="Android"/>
+		<Platform Name="Windows" GUID="{8DF9F2B2-0A5A-403C-9859-10D703B31C90}" BasePlatform="Windows" BasePlatformGUID="{6E0CB257-C6C8-4C5C-8366-2740DFC441EB}" Path="Windows"/>
+	</Platforms>
+	<Languages>
+		<Language Name="English(US)" Id="684519430" GUID="{DCC31404-B00F-4632-B781-F720E9BE1DE5}" Default="true" UseAsStandIn="true"/>
+	</Languages>
+	<FileHash>{C3B40941-DD34-0C08-05C4-3B1A30F28FC0}</FileHash>
+</ProjectInfo>

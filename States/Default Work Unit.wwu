@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{0AC172E0-ECEA-477B-96A8-B441E8FCA59C}" SchemaVersion="119">
+	<States>
+		<WorkUnit Name="Default Work Unit" ID="{0AC172E0-ECEA-477B-96A8-B441E8FCA59C}" PersistMode="Standalone">
+			<ChildrenList>
+				<StateGroup Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}">
+					<Comment>23111038</Comment>
+					<ChildrenList>
+						<State Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+						<State Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}">
+							<Comment>3791155954</Comment>
+						</State>
+					</ChildrenList>
+				</StateGroup>
+				<StateGroup Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}">
+					<Comment>1574102113</Comment>
+					<ChildrenList>
+						<State Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+						<State Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}">
+							<Comment>1651971902</Comment>
+						</State>
+					</ChildrenList>
+				</StateGroup>
+				<StateGroup Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}">
+					<Comment>1252603985</Comment>
+					<ChildrenList>
+						<State Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+						<State Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}">
+							<Comment>680256650</Comment>
+						</State>
+						<State Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}">
+							<Comment>1686739432</Comment>
+						</State>
+						<State Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}">
+							<Comment>2392706382</Comment>
+						</State>
+						<State Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+						<State Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}">
+							<Comment>2060081664</Comment>
+						</State>
+					</ChildrenList>
+				</StateGroup>
+				<StateGroup Name="_916877295" ID="{5AC1FDB4-FFFD-4F50-BF1B-E04BE92DCB3E}">
+					<Comment>916877295</Comment>
+					<ChildrenList>
+						<State Name="None" ID="{496932BD-5D25-4FF2-A9F9-9027D15A15CD}"/>
+					</ChildrenList>
+				</StateGroup>
+				<StateGroup Name="_2505245191" ID="{CF277BC1-BECC-4BC8-A94C-BF9C13EE8FF0}">
+					<ChildrenList>
+						<State Name="None" ID="{4A6A2826-A161-4045-8EBF-9E6FDB5DBFB6}"/>
+					</ChildrenList>
+				</StateGroup>
+			</ChildrenList>
+		</WorkUnit>
+	</States>
+</WwiseDocument>

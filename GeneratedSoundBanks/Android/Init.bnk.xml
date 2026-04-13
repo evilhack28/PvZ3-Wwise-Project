@@ -1,0 +1,3875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="#stylesheet" ?>
+<!DOCTYPE doc [
+  <!ELEMENT xsl:stylesheet (#PCDATA)>
+  <!ATTLIST xsl:stylesheet id ID #REQUIRED>
+]>
+<doc>
+
+<!-- STYLESHEET -->
+<xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >
+    <!-- HTML5 doctype -->
+    <xsl:output method="html" indent="yes" encoding="UTF-8" doctype-system="about:legacy-compat" />
+
+    <!-- ignore space text nodes -->
+    <xsl:strip-space elements="*"/>
+
+    <!-- do nothing for this stylesheet -->
+    <xsl:template match="xsl:stylesheet" />
+
+    <!-- make root node base HTML -->
+    <xsl:template match="/doc/base"> 
+        <html>
+            <head>
+                <title>wwiser dump</title>
+                <style>
+html { overflow-y: scroll; }
+body { font-family: monospace; font-size: 16px; white-space: nowrap; }
+
+/* fields */
+.object, .list, .field, .skip, .error { margin-left: 45px; }
+
+.head { display: flex;  align-items: center; }
+.head > .attr { _margin-right:10px; _display:inline-block; margin: 0; padding: 0; _outline: 1px solid red;}
+.head > .attr.type { min-width:45px; color:#0074D9; }
+.head > .attr.name { min-width:350px; color:#FF4136; }
+.head > .attr.value { color:#3D9970; }
+.head > .attr.hashname,
+.head > .attr.guidname,
+.head > .attr.objpath,
+.head > .attr.path { color:#800080; _color:#9932CC; margin-left:10px; }
+
+.list > .head > .attr { color:#B10DC9; }
+.object > .head > .attr.name { width:auto; }
+.object > .head > .attr.type,
+.object > .head > .attr.name { color:#85144b; }
+
+.index { color:#777; font-size:12px; }
+.skip { color: #777; } 
+.error { color:red; font-weight: bold; }
+.error:before { content: '**'; }
+
+.offset { color: #aaa; position: absolute; left: 10px; }
+.content { margin-left:80px; }
+
+/* simple */
+.simple .head > .attr.type { display:none; }
+.simple .offset { display:none; }
+
+/* links */
+.target {
+    display:inline-block; width:0px; height:0px; min-width:0px;max-width:0px; min-height:0px;max-height:0px; vertical-align: center;
+    margin-left:6px;text-indent:16px; overflow: hidden;
+    background-color: transparent;  border-radius:1px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid cadetblue;
+}
+.anchor {
+    display:inline-block; width:10px; height:10px; min-width:10px;max-width:10px; min-height:10px;max-height:10px; vertical-align: center;
+    margin-left:6px; text-indent:16px; overflow: hidden;
+    background-color: #87b6b8; border-radius:6px;
+}
+
+/* toggler */
+.closable > .head { cursor:pointer; margin-left: -25px; padding-left: 25px; }
+.closable > .head:before {
+    content:'-'; position:absolute; font-weight: bold; margin-top:2px; margin-left: -25px; color:666; 
+    width:20px; line-height:12px; text-align:center; display:inline-block; background-color:#eee; border-radius:3px; vertical-align: bottom;
+}
+.closable.hidden > .head:before { content:'+'; }
+.closable > .head > .attr { cursor:auto; }
+.closable.hidden > .body { display:none; }
+
+/* tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    background-color:#800080;
+    width: 10px; height: 10px; margin-left:2px;
+}
+.tooltip.objpath { }
+.tooltip.path { border-radius: 6px; }
+
+.tooltip > .attr {
+    display:none; position: absolute; top: -5px; right: 100%;
+    border-radius: 5px; padding: 1px; background-color: #eee; color:#800080
+}
+.tooltip:hover .attr {
+    display:block;
+}
+
+/* page */
+.tools {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 30px;
+}
+.view.hide-offset .offset {
+    display:none;
+}
+.view.hide-type .attr.type {
+    display:none;
+}
+
+                </style>
+            </head>
+            <body>
+                <div class="view" id="view">
+                    <div class="tools">
+                        Hide:
+                        <label><input type="checkbox" class="hide" value="hide-offset"/>Offset</label>
+                        <label><input type="checkbox" class="hide" value="hide-type"/>Type</label>
+                    </div>
+                    <div class="content">
+                        <xsl:apply-templates />
+                    </div>
+                </div>
+
+                <script>
+<xsl:text disable-output-escaping="yes">
+<![CDATA[
+(function() {
+    let main = document.getElementById('view');
+    document.addEventListener('click', function(e) {
+        if (!e.target)
+            return;
+
+        if (e.target.matches('.closable > .head')) {
+            e.target.parentNode.classList.toggle('hidden');
+            return;
+        }
+        if (e.target.matches('.hide')) {
+            main.classList.toggle(e.target.value);
+            return;
+        }
+    }, false);
+
+    // test option to middle-click on a wem and open it, browser support is kinda wonky
+    /*
+    let NEW_VERSION = 62;
+    let version = null;
+    function get_version() {
+        if (version)
+            return version;
+
+        let root_obj = document.querySelector('.root > .head > name');
+        if (!root_obj)
+            return null;
+        version = int(root_obj.textContent.substring(1));
+        return version;
+    }
+
+    function get_ext(source_obj) {
+        let version = get_version();
+        if (version >= NEW_VERSION )
+            return '.wem';
+
+        let plugin_fld = source_obj.querySelector('.head > .value');
+        if (plugin_fld.textContent.includes('[VORBIS]'))
+            return '.ogg';
+        if (plugin_fld.textContent.includes('[XMA]'))
+            return '.xma';
+        return '.wav'
+    }
+
+    document.addEventListener('auxclick', function(event) {
+        if (event.button != 1)
+            return;
+
+        let elem = event.target;
+        if (!elem.matches('a.target'))
+            return;
+
+        event.preventDefault();
+
+        let media_obj = elem.closest('.object'); //AkMediaInformation
+        if (!media_obj)
+            return;
+
+        let obj_name = media_obj.querySelector('.head > .name');
+        if (!obj_name.textContent.includes('AkMediaInformation'))
+            return;
+        let is_stream = false;
+        let source_obj = media_obj.parentElement.closest('.object');
+        let type_fld = media_obj.previousElementSibling;
+        if (type_fld) {
+            let type_value = type_fld.querySelector('.value');
+            is_stream = type_value.textContent.includes('[Streaming]');
+        }
+
+        let elem_id = elem.href.substring(elem.href.lastIndexOf('#') + 1);
+
+        if (is_stream) {
+            let filename = elem_id + get_ext(source_obj);
+            window.open(filename);
+            //window.open('file://' + filename);
+        }
+        else {
+            //would need to detect subsong N + pass TXTP to browser
+        }
+    })
+    */
+
+})();
+]]>
+</xsl:text>
+                </script>
+            </body>
+        </html>
+    </xsl:template>
+
+    <xsl:template match="root">
+        <div class="root closable">
+            <div class="head">
+                <span class="attr type">bank</span>
+                <span class="attr name">v<xsl:value-of select="@version"/></span>
+                <span class="attr value"><xsl:value-of select="@filename"/></span>
+                <!--<span class="attr value">(<xsl:value-of select="@path"/></span>-->
+            </div>
+            <div class="body">
+                <xsl:apply-templates />
+            </div>
+        </div>
+    </xsl:template>
+
+    <xsl:template match="object|obj">
+        <div class="object closable">
+            <div class="head">
+                <span class="attr type">obj</span>
+                <span class="attr name">
+                    <xsl:value-of select="@name|@na"/>
+                    <xsl:if test="@index|@ix">
+                        <span class="index">[<xsl:value-of select="@index|@ix"/>]</span>
+                    </xsl:if>
+                </span>
+            </div>
+            <div class="body">
+                <xsl:apply-templates />
+            </div>
+        </div>
+    </xsl:template>
+
+    <xsl:template match="list|lst">
+        <!--<xsl:if test="count(*)>0">-->
+        <div class="list closable">
+            <div class="head">
+                <span class="attr type">list</span>
+                <span class="attr name"><xsl:value-of select="@name|@na"/></span>
+                <span class="attr value"><xsl:value-of select="@count|@co"/></span>
+            </div>
+            <div class="body">
+                <xsl:apply-templates />
+            </div>
+        </div>
+        <!--</xsl:if>-->
+    </xsl:template>
+
+    <xsl:template match="field|fld">
+        <div class="field">
+            <xsl:if test="@offset|@of">
+            <div class="offset">
+                <xsl:value-of select="@offset|@of"/>
+            </div>
+            </xsl:if>
+            <div class="head">
+                <span class="attr type"><xsl:value-of select="@type|@ty"/></span>
+                <span class="attr name"><xsl:value-of select="@name|@na"/></span>
+                <span class="attr value">
+                <xsl:choose>
+                    <xsl:when test="@valuefmt|@vf"><xsl:value-of select="@valuefmt|@vf"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="@value|@va"/></xsl:otherwise>
+                </xsl:choose>
+                </span>
+                <!--clickable links need text nodes, but not anchors-->
+                <xsl:if test="(@type='tid' or @ty='tid')and (@value!=0 or @va!=0) and (@value!=-1 or @va!=-1)"><a class="target" href="#{@value|@va}">target</a></xsl:if>
+                <xsl:if test="@type='sid' or @ty='sid'"><a class="anchor" id="{@value|@va}" href="#{@value|@va}">anchor</a></xsl:if>
+
+                <xsl:if test="@hashname|@hn">
+                    <span class="attr hashname">(<xsl:value-of select="@hashname|@hn"/>)</span>
+                </xsl:if>
+                <xsl:if test="@guidname|@gn">
+                    <span class="attr guidname">{<xsl:value-of select="@guidname|@gn"/>}</span>
+                </xsl:if>
+                <xsl:if test="@objpath|@op">
+                    <span class="tooltip objpath"><span class="attr objpath"><xsl:value-of select="@objpath|@op"/></span></span>
+                </xsl:if>
+                <xsl:if test="@path|@pa">
+                    <span class="tooltip path"><span class="attr path"><xsl:value-of select="@path|@pa"/></span></span>
+                </xsl:if>
+            </div>
+            <xsl:if test="*">
+            <div class="body">
+                <xsl:apply-templates />
+            </div>
+            </xsl:if>
+        </div>
+    </xsl:template>
+
+    <xsl:template match="skip">
+        <div class="skip">
+            (skipped <xsl:value-of select="@size|@si"/>)
+            <xsl:apply-templates />
+        </div>
+    </xsl:template>
+
+    <xsl:template match="error">
+        <div class="error">
+            error: <xsl:value-of select="@message|@me"/>
+            <xsl:apply-templates />
+        </div>
+    </xsl:template>
+
+</xsl:stylesheet>
+
+<!-- XML -->
+<base>
+<root filename="Init.bnk" pa="C:/Users/evilhack28/Documents/WwiseProjects/PvZ3-Wwise-Full-Project/GeneratedSoundBanks/Android" version="150">
+	<obj na="BankHeader">
+		<fld ty="4cc" na="dwTag" va="b&apos;BKHD&apos;" vf="b&apos;BKHD&apos; [Bank Header]"/>
+		<fld ty="u32" na="dwChunkSize" va="48" vf="0x30"/>
+		<obj na="AkBankHeader">
+			<fld ty="u32" na="dwBankGeneratorVersion" va="150"/>
+			<fld ty="sid" na="dwSoundBankID" va="1355168291" hn="Init" gn="Init" pa="Init.bnk"/>
+			<fld ty="sid" na="dwLanguageID" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+			<fld ty="u32" na="uAltValues" va="16" vf="0x10">
+				<fld ty="bit0" na="uAlignment" va="16" vf="16"/>
+				<fld ty="bit16" na="bDeviceAllocated" va="0" vf="0"/>
+			</fld>
+			<fld ty="u32" na="dwProjectID" va="0"/>
+			<fld ty="u32" na="dwSoundBankType" va="0" vf="0x00 [User]"/>
+			<fld ty="gap" na="abyBankHash" va="16" vf="0x10"/>
+			<fld ty="gap" na="padding" va="8" vf="0x08"/>
+		</obj>
+	</obj>
+	<obj na="PluginChunk">
+		<fld ty="4cc" na="dwTag" va="b&apos;INIT&apos;" vf="b&apos;INIT&apos; [Plugin]"/>
+		<fld ty="u32" na="dwChunkSize" va="59" vf="0x3B"/>
+		<fld ty="u32" na="count" va="5"/>
+		<lst na="pAKPluginList" co="5">
+			<obj na="IAkPlugin" ix="0">
+				<fld ty="u32" na="ulPluginID" va="6946819" vf="0x006A0003 [Wwise Delay]">
+					<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+					<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+				</fld>
+				<fld ty="stz" na="pDLLName" va="AkDelay"/>
+			</obj>
+			<obj na="IAkPlugin" ix="1">
+				<fld ty="u32" na="ulPluginID" va="7208963" vf="0x006E0003 [Wwise Peak Limiter]">
+					<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+					<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+				</fld>
+				<fld ty="stz" na="pDLLName" va="AkPeakLimiter"/>
+			</obj>
+			<obj na="IAkPlugin" ix="2">
+				<fld ty="u32" na="ulPluginID" va="7733251" vf="0x00760003 [Wwise RoomVerb]">
+					<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+					<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+				</fld>
+				<fld ty="stz" na="pDLLName" va="AkRoomVerb"/>
+			</obj>
+			<obj na="IAkPlugin" ix="3">
+				<fld ty="u32" na="ulPluginID" va="11403271" vf="0x00AE0007 [System]">
+					<fld ty="u16" na="type" va="7" vf="0x07 [Sink]"/>
+					<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+				</fld>
+				<fld ty="stz" na="pDLLName" va=""/>
+			</obj>
+			<obj na="IAkPlugin" ix="4">
+				<fld ty="u32" na="ulPluginID" va="11862023" vf="0x00B50007 [No Output]">
+					<fld ty="u16" na="type" va="7" vf="0x07 [Sink]"/>
+					<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+				</fld>
+				<fld ty="stz" na="pDLLName" va=""/>
+			</obj>
+		</lst>
+	</obj>
+	<obj na="GlobalSettingsChunk">
+		<fld ty="4cc" na="dwTag" va="b&apos;STMG&apos;" vf="b&apos;STMG&apos; [Global Settings]"/>
+		<fld ty="u32" na="dwChunkSize" va="548" vf="0x224"/>
+		<fld ty="u16" na="uFilterBehavior" va="0" vf="0x00 [Additive]"/>
+		<fld ty="f32" na="fVolumeThreshold" va="-80.0"/>
+		<fld ty="u16" na="maxNumVoicesLimitInternal" va="256"/>
+		<fld ty="u16" na="maxNumDangerousVirtVoicesLimitInternal" va="50"/>
+		<fld ty="u32" na="ulNumStateGroups" va="5"/>
+		<lst na="StateGroups" co="5">
+			<obj na="AkStateGroup" ix="0">
+				<fld ty="sid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+				<fld ty="u32" na="DefaultTransitionTime" va="1000"/>
+				<fld ty="u32" na="ulNumTransitions" va="0"/>
+				<lst na="mapTransitions" co="0"/>
+			</obj>
+			<obj na="AkStateGroup" ix="1">
+				<fld ty="sid" na="ulStateGroupID" va="258667562" hn="_916877295" gn="_916877295" op="\Default Work Unit\_916877295"/>
+				<fld ty="u32" na="DefaultTransitionTime" va="1000"/>
+				<fld ty="u32" na="ulNumTransitions" va="0"/>
+				<lst na="mapTransitions" co="0"/>
+			</obj>
+			<obj na="AkStateGroup" ix="2">
+				<fld ty="sid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+				<fld ty="u32" na="DefaultTransitionTime" va="1000"/>
+				<fld ty="u32" na="ulNumTransitions" va="0"/>
+				<lst na="mapTransitions" co="0"/>
+			</obj>
+			<obj na="AkStateGroup" ix="3">
+				<fld ty="sid" na="ulStateGroupID" va="1798344716" hn="_2505245191" gn="_2505245191" op="\Default Work Unit\_2505245191"/>
+				<fld ty="u32" na="DefaultTransitionTime" va="1000"/>
+				<fld ty="u32" na="ulNumTransitions" va="0"/>
+				<lst na="mapTransitions" co="0"/>
+			</obj>
+			<obj na="AkStateGroup" ix="4">
+				<fld ty="sid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+				<fld ty="u32" na="DefaultTransitionTime" va="1000"/>
+				<fld ty="u32" na="ulNumTransitions" va="0"/>
+				<lst na="mapTransitions" co="0"/>
+			</obj>
+		</lst>
+		<fld ty="u32" na="ulNumSwitchGroups" va="0"/>
+		<lst na="pItems" co="0"/>
+		<fld ty="u32" na="ulNumParams" va="22"/>
+		<lst na="pRTPCMgr" co="22">
+			<obj na="RTPCRamping" ix="0">
+				<fld ty="sid" na="RTPC_ID" va="570264526" hn="_3168828037"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="1">
+				<fld ty="sid" na="RTPC_ID" va="642063162" hn="_1560925592"/>
+				<fld ty="f32" na="fValue" va="1.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="2">
+				<fld ty="sid" na="RTPC_ID" va="822163944" hn="SS_AIR_RPM"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="3">
+				<fld ty="sid" na="RTPC_ID" va="898349194" hn="_2350240842"/>
+				<fld ty="f32" na="fValue" va="100.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="4">
+				<fld ty="sid" na="RTPC_ID" va="1029930033" hn="SS_AIR_FURY"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="5">
+				<fld ty="sid" na="RTPC_ID" va="1072159968" hn="_665269705"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="6">
+				<fld ty="sid" na="RTPC_ID" va="1351367891" hn="SS_AIR_FEAR"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="7">
+				<fld ty="sid" na="RTPC_ID" va="2211248110" hn="_3224341500"/>
+				<fld ty="f32" na="fValue" va="1.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="8">
+				<fld ty="sid" na="RTPC_ID" va="2648548617" hn="SS_AIR_MONTH"/>
+				<fld ty="f32" na="fValue" va="6.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="9">
+				<fld ty="sid" na="RTPC_ID" va="2813364820" hn="_2803734810" gn="_2803734810" op="\Default Work Unit\_2803734810"/>
+				<fld ty="f32" na="fValue" va="100.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="10">
+				<fld ty="sid" na="RTPC_ID" va="3002758120" hn="SS_AIR_FREEFALL"/>
+				<fld ty="f32" na="fValue" va="75.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="11">
+				<fld ty="sid" na="RTPC_ID" va="3074696722" hn="SS_AIR_SIZE"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="12">
+				<fld ty="sid" na="RTPC_ID" va="3203397129" hn="SS_AIR_TIMEOFDAY"/>
+				<fld ty="f32" na="fValue" va="6.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="13">
+				<fld ty="sid" na="RTPC_ID" va="3332983975" hn="_3103374327"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="14">
+				<fld ty="sid" na="RTPC_ID" va="3513502790" hn="_3239745623" gn="_3239745623"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="15">
+				<fld ty="sid" na="RTPC_ID" va="3661356439" hn="_913070258"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="16">
+				<fld ty="sid" na="RTPC_ID" va="3715662592" hn="SS_AIR_STORM"/>
+				<fld ty="f32" na="fValue" va="75.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="17">
+				<fld ty="sid" na="RTPC_ID" va="3847924954" hn="SS_AIR_PRESENCE"/>
+				<fld ty="f32" na="fValue" va="75.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="18">
+				<fld ty="sid" na="RTPC_ID" va="4160247818" hn="SS_AIR_TURBULENCE"/>
+				<fld ty="f32" na="fValue" va="6.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="19">
+				<fld ty="sid" na="RTPC_ID" va="4167557555" hn="_2760037741"/>
+				<fld ty="f32" na="fValue" va="25.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="20">
+				<fld ty="sid" na="RTPC_ID" va="4216088362" hn="_234334960"/>
+				<fld ty="f32" na="fValue" va="50.0"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+			<obj na="RTPCRamping" ix="21">
+				<fld ty="sid" na="RTPC_ID" va="4274731395" hn="_4144080943"/>
+				<fld ty="f32" na="fValue" va="0.5"/>
+				<fld ty="u32" na="rampType" va="0" vf="0x00 [None]"/>
+				<fld ty="f32" na="fRampUp" va="0.0"/>
+				<fld ty="f32" na="fRampDown" va="0.0"/>
+				<fld ty="u8" na="eBindToBuiltInParam" va="0" vf="0x00 [None]"/>
+			</obj>
+		</lst>
+		<fld ty="u32" na="ulNumTextures" va="0"/>
+		<lst na="acousticTextures" co="0"/>
+	</obj>
+	<obj na="HircChunk">
+		<fld ty="4cc" na="dwTag" va="b&apos;HIRC&apos;" vf="b&apos;HIRC&apos; [Hierarchy]"/>
+		<fld ty="u32" na="dwChunkSize" va="2857" vf="0xB29"/>
+		<fld ty="u32" na="NumReleasableHircItem" va="31"/>
+		<lst na="listLoadedItem" co="31">
+			<obj na="CAkAudioDevice" ix="0">
+				<fld ty="u8" na="eHircType" va="21" vf="0x15 [Audio Device]"/>
+				<fld ty="u32" na="dwSectionSize" va="20" vf="0x14"/>
+				<fld ty="sid" na="ulID" va="2317455096" hn="No_Output" gn="No_Output"/>
+				<obj na="AudioDeviceInitialValues">
+					<obj na="FxBaseInitialValues">
+						<fld ty="u32" na="fxID" va="11862023" vf="0x00B50007 [No Output]">
+							<fld ty="u16" na="type" va="7" vf="0x07 [Sink]"/>
+							<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+						</fld>
+						<fld ty="u32" na="uSize" va="0" vf="0x00"/>
+						<fld ty="u8" na="uNumBankData" va="0"/>
+						<lst na="media" co="0"/>
+						<obj na="InitialRTPC">
+							<fld ty="u16" na="uNumCurves" va="0"/>
+							<lst na="pRTPCMgr" co="0"/>
+						</obj>
+						<obj na="StateChunk">
+							<fld ty="var" na="ulNumStateProps" va="0"/>
+							<lst na="stateProps" co="0"/>
+							<fld ty="var" na="ulNumStateGroups" va="0"/>
+							<lst na="pStateChunks" co="0"/>
+						</obj>
+						<fld ty="u16" na="numValues" va="0"/>
+						<lst na="propertyValues" co="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+				</obj>
+			</obj>
+			<obj na="CAkAudioDevice" ix="1">
+				<fld ty="u8" na="eHircType" va="21" vf="0x15 [Audio Device]"/>
+				<fld ty="u32" na="dwSectionSize" va="32" vf="0x20"/>
+				<fld ty="sid" na="ulID" va="3859886410" hn="System" gn="System"/>
+				<obj na="AudioDeviceInitialValues">
+					<obj na="FxBaseInitialValues">
+						<fld ty="u32" na="fxID" va="11403271" vf="0x00AE0007 [System]">
+							<fld ty="u16" na="type" va="7" vf="0x07 [Sink]"/>
+							<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+						</fld>
+						<fld ty="u32" na="uSize" va="12" vf="0x0C"/>
+						<obj na="AkPluginParam">
+							<fld ty="gap" na="pParamBlock" va="12" vf="0x0C"/>
+						</obj>
+						<fld ty="u8" na="uNumBankData" va="0"/>
+						<lst na="media" co="0"/>
+						<obj na="InitialRTPC">
+							<fld ty="u16" na="uNumCurves" va="0"/>
+							<lst na="pRTPCMgr" co="0"/>
+						</obj>
+						<obj na="StateChunk">
+							<fld ty="var" na="ulNumStateProps" va="0"/>
+							<lst na="stateProps" co="0"/>
+							<fld ty="var" na="ulNumStateGroups" va="0"/>
+							<lst na="pStateChunks" co="0"/>
+						</obj>
+						<fld ty="u16" na="numValues" va="0"/>
+						<lst na="propertyValues" co="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="2">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="128" vf="0x80"/>
+				<fld ty="sid" na="ulID" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="0"/>
+					<fld ty="tid" na="idDeviceShareset" va="3859886410" hn="System" gn="System"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="1"/>
+						<fld ty="u8" na="bBypassAll" va="0" vf="0x00"/>
+						<lst na="pFXChunk" co="1">
+							<obj na="FXChunk" ix="0">
+								<fld ty="u8" na="uFXIndex" va="0"/>
+								<fld ty="tid" na="fxID" va="1459522457" hn="Brick_Wall_Minus_1dB_Peak_Fast_Release" gn="Brick_Wall_Minus_1dB_Peak_Fast_Release"/>
+								<fld ty="u8" na="bitVector" va="2" vf="0x02">
+									<fld ty="bit0" na="bBypass" va="0"/>
+									<fld ty="bit1" na="bShareSet" va="0"/>
+								</fld>
+							</obj>
+						</lst>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="2"/>
+						<lst na="pStateChunks" co="2">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1886650946" hn="_2392706382" gn="_2392706382"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="3791155954" hn="Muted" gn="Muted"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkAuxBus" ix="3">
+				<fld ty="u8" na="eHircType" va="18" vf="0x12 [Auxiliary Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="53" vf="0x35"/>
+				<fld ty="sid" na="ulID" va="348963605" hn="Reverb" gn="Reverb" op="\Default Work Unit\Master Audio Bus\Reverb"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="1"/>
+							<lst na="pProps" co="1">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="0"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.30000305175781"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="1"/>
+						<fld ty="u8" na="bBypassAll" va="1" vf="0x01"/>
+						<lst na="pFXChunk" co="1">
+							<obj na="FXChunk" ix="0">
+								<fld ty="u8" na="uFXIndex" va="0"/>
+								<fld ty="tid" na="fxID" va="50413142"/>
+								<fld ty="u8" na="bitVector" va="1" vf="0x01">
+									<fld ty="bit0" na="bBypass" va="1"/>
+									<fld ty="bit1" na="bShareSet" va="0"/>
+								</fld>
+							</obj>
+						</lst>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkAuxBus" ix="4">
+				<fld ty="u8" na="eHircType" va="18" vf="0x12 [Auxiliary Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="53" vf="0x35"/>
+				<fld ty="sid" na="ulID" va="357718954" hn="Delay" gn="Delay" op="\Default Work Unit\Master Audio Bus\Delay"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="1"/>
+							<lst na="pProps" co="1">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="0"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.30000305175781"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="1"/>
+						<fld ty="u8" na="bBypassAll" va="0" vf="0x00"/>
+						<lst na="pFXChunk" co="1">
+							<obj na="FXChunk" ix="0">
+								<fld ty="u8" na="uFXIndex" va="0"/>
+								<fld ty="tid" na="fxID" va="485212956"/>
+								<fld ty="u8" na="bitVector" va="0" vf="0x00">
+									<fld ty="bit0" na="bBypass" va="0"/>
+									<fld ty="bit1" na="bShareSet" va="0"/>
+								</fld>
+							</obj>
+						</lst>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="5">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="104" vf="0x68"/>
+				<fld ty="sid" na="ulID" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="1"/>
+						<lst na="pRTPCMgr" co="1">
+							<obj na="RTPC" ix="0">
+								<fld ty="tid" na="RTPCID" va="2813364820" hn="_2803734810" gn="_2803734810" op="\Default Work Unit\_2803734810"/>
+								<fld ty="u8" na="rtpcType" va="0" vf="0x00 [GameParameter]"/>
+								<fld ty="u8" na="rtpcAccum" va="2" vf="0x02 [Additive]"/>
+								<fld ty="var" na="ParamID" va="13" vf="0x0D [PlaybackSpeed]"/>
+								<fld ty="sid" na="rtpcCurveID" va="492495379"/>
+								<fld ty="u8" na="eScaling" va="2" vf="0x02 [dB]"/>
+								<fld ty="u16" na="ulSize" va="2"/>
+								<lst na="pRTPCMgr" co="2">
+									<obj na="AkRTPCGraphPoint" ix="0">
+										<fld ty="f32" na="From" va="0.0"/>
+										<fld ty="f32" na="To" va="-1.0"/>
+										<fld ty="u32" na="Interp" va="1" vf="0x01 [Sine]"/>
+									</obj>
+									<obj na="AkRTPCGraphPoint" ix="1">
+										<fld ty="f32" na="From" va="100.0"/>
+										<fld ty="f32" na="To" va="0.0"/>
+										<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+									</obj>
+								</lst>
+							</obj>
+						</lst>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="6">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="71" vf="0x47"/>
+				<fld ty="sid" na="ulID" va="694692527" hn="VFX" gn="VFX" op="\Default Work Unit\Master Audio Bus\SFX\VFX"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="7">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="87" vf="0x57"/>
+				<fld ty="sid" na="ulID" va="1047870521" hn="Narrative" gn="Narrative" op="\Default Work Unit\Master Audio Bus\SFX\Narrative"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="1"/>
+						<lst na="pStateChunks" co="1">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="8">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="71" vf="0x47"/>
+				<fld ty="sid" na="ulID" va="1317300247" hn="Plants" gn="Plants" op="\Default Work Unit\Master Audio Bus\SFX\Plants"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="9">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="92" vf="0x5C"/>
+				<fld ty="sid" na="ulID" va="1534528548" hn="Vo" gn="Vo" op="\Default Work Unit\Master Audio Bus\SFX\Vo"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-5.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="1"/>
+						<lst na="pStateChunks" co="1">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="10">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="1928331309" hn="2269110654" gn="2269110654" op="\Default Work Unit\Master Audio Bus\SFX\2269110654"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="11">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="152" vf="0x98"/>
+				<fld ty="sid" na="ulID" va="105317894" hn="Ambience_map" gn="Ambience_map" op="\Default Work Unit\Master Audio Bus\SFX\2269110654\Ambience_map"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="1928331309" hn="2269110654" gn="2269110654" op="\Default Work Unit\Master Audio Bus\SFX\2269110654"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="3"/>
+						<lst na="pStateChunks" co="3">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="3"/>
+								<lst na="pStates" co="3">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="680256650" hn="arena" gn="arena"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="1">
+										<fld ty="tid" na="ulStateID" va="1686739432" hn="Store" gn="Store"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="2">
+										<fld ty="tid" na="ulStateID" va="2698818378" hn="_4113309430" gn="_4113309430"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1651971902" hn="ON" gn="ON"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="2">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="12">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="105" vf="0x69"/>
+				<fld ty="sid" na="ulID" va="2617108498" hn="4168582764" gn="4168582764" op="\Default Work Unit\Master Audio Bus\SFX\2269110654\4168582764"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="1928331309" hn="2269110654" gn="2269110654" op="\Default Work Unit\Master Audio Bus\SFX\2269110654"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="2"/>
+						<lst na="pStateChunks" co="2">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1651971902" hn="ON" gn="ON"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="13">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="147" vf="0x93"/>
+				<fld ty="sid" na="ulID" va="4038384417" hn="2859982272" gn="2859982272" op="\Default Work Unit\Master Audio Bus\SFX\2269110654\2859982272"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="1928331309" hn="2269110654" gn="2269110654" op="\Default Work Unit\Master Audio Bus\SFX\2269110654"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="3"/>
+						<lst na="pStateChunks" co="3">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="3"/>
+								<lst na="pStates" co="3">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="680256650" hn="arena" gn="arena"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="1">
+										<fld ty="tid" na="ulStateID" va="1686739432" hn="Store" gn="Store"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="2">
+										<fld ty="tid" na="ulStateID" va="2698818378" hn="_4113309430" gn="_4113309430"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1651971902" hn="ON" gn="ON"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="2">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="14">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="71" vf="0x47"/>
+				<fld ty="sid" na="ulID" va="2275399817" hn="Combat_Impacts" gn="Combat_Impacts" op="\Default Work Unit\Master Audio Bus\SFX\Combat_Impacts"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="15">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="92" vf="0x5C"/>
+				<fld ty="sid" na="ulID" va="2976663622" hn="Meta" gn="Meta" op="\Default Work Unit\Master Audio Bus\SFX\Meta"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="1"/>
+						<lst na="pStateChunks" co="1">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="16">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="152" vf="0x98"/>
+				<fld ty="sid" na="ulID" va="3270275469" hn="2914240860" gn="2914240860" op="\Default Work Unit\Master Audio Bus\SFX\2914240860"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="3"/>
+						<lst na="pStateChunks" co="3">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="3"/>
+								<lst na="pStates" co="3">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="680256650" hn="arena" gn="arena"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="1">
+										<fld ty="tid" na="ulStateID" va="1686739432" hn="Store" gn="Store"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="2">
+										<fld ty="tid" na="ulStateID" va="2698818378" hn="_4113309430" gn="_4113309430"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1651971902" hn="ON" gn="ON"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="2">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="17">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="71" vf="0x47"/>
+				<fld ty="sid" na="ulID" va="4113933398" hn="Zombies" gn="Zombies" op="\Default Work Unit\Master Audio Bus\SFX\Zombies"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="393239870" hn="SFX" gn="SFX" op="\Default Work Unit\Master Audio Bus\SFX"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="18">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="197" vf="0xC5"/>
+				<fld ty="sid" na="ulID" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="8" vf="0x08">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="1"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="1"/>
+						<lst na="pRTPCMgr" co="1">
+							<obj na="RTPC" ix="0">
+								<fld ty="tid" na="RTPCID" va="898349194" hn="_2350240842"/>
+								<fld ty="u8" na="rtpcType" va="0" vf="0x00 [GameParameter]"/>
+								<fld ty="u8" na="rtpcAccum" va="2" vf="0x02 [Additive]"/>
+								<fld ty="var" na="ParamID" va="13" vf="0x0D [PlaybackSpeed]"/>
+								<fld ty="sid" na="rtpcCurveID" va="601094077"/>
+								<fld ty="u8" na="eScaling" va="2" vf="0x02 [dB]"/>
+								<fld ty="u16" na="ulSize" va="2"/>
+								<lst na="pRTPCMgr" co="2">
+									<obj na="AkRTPCGraphPoint" ix="0">
+										<fld ty="f32" na="From" va="0.0"/>
+										<fld ty="f32" na="To" va="-1.0"/>
+										<fld ty="u32" na="Interp" va="1" vf="0x01 [Sine]"/>
+									</obj>
+									<obj na="AkRTPCGraphPoint" ix="1">
+										<fld ty="f32" na="From" va="100.0"/>
+										<fld ty="f32" na="To" va="0.0"/>
+										<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+									</obj>
+								</lst>
+							</obj>
+						</lst>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="5"/>
+						<lst na="stateProps" co="5">
+							<obj na="AkStatePropertyInfo" ix="0">
+								<fld ty="var" na="PropertyId" va="0" vf="0x00 [Volume]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="1">
+								<fld ty="var" na="PropertyId" va="1" vf="0x01 [LFE]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="2">
+								<fld ty="var" na="PropertyId" va="2" vf="0x02 [Pitch]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="3">
+								<fld ty="var" na="PropertyId" va="3" vf="0x03 [LPF]"/>
+								<fld ty="u8" na="accumType" va="6" vf="0x06 [Filter]"/>
+								<fld ty="u8" na="inDb" va="0" vf="0x00"/>
+							</obj>
+							<obj na="AkStatePropertyInfo" ix="4">
+								<fld ty="var" na="PropertyId" va="4" vf="0x04 [HPF]"/>
+								<fld ty="u8" na="accumType" va="2" vf="0x02 [Additive]"/>
+								<fld ty="u8" na="inDb" va="1" vf="0x01"/>
+							</obj>
+						</lst>
+						<fld ty="var" na="ulNumStateGroups" va="3"/>
+						<lst na="pStateChunks" co="3">
+							<obj na="AkStateGroupChunk" ix="0">
+								<fld ty="tid" na="ulStateGroupID" va="2203893723" hn="_1252603985" gn="_1252603985" op="\Default Work Unit\_1252603985"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="4"/>
+								<lst na="pStates" co="4">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="680256650" hn="arena" gn="arena"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="1">
+										<fld ty="tid" na="ulStateID" va="1686739432" hn="Store" gn="Store"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="2">
+										<fld ty="tid" na="ulStateID" va="2698818378" hn="_4113309430" gn="_4113309430"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+									<obj na="AkState" ix="3">
+										<fld ty="tid" na="ulStateID" va="3074807787"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-12.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="1">
+								<fld ty="tid" na="ulStateGroupID" va="691185007" hn="_1574102113" gn="_1574102113" op="\Default Work Unit\_1574102113"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="1"/>
+								<lst na="pStates" co="1">
+									<obj na="AkState" ix="0">
+										<fld ty="tid" na="ulStateID" va="1651971902" hn="ON" gn="ON"/>
+										<obj na="AkPropBundle&lt;float,unsigned short&gt;">
+											<fld ty="u16" na="cProps" va="1"/>
+											<lst na="pProps" co="1">
+												<obj na="AkPropBundle" ix="0">
+													<fld ty="u16" na="pID" va="4" vf="0x04 [HPF]"/>
+													<fld ty="f32" na="pValue" va="-96.0"/>
+												</obj>
+											</lst>
+										</obj>
+									</obj>
+								</lst>
+							</obj>
+							<obj na="AkStateGroupChunk" ix="2">
+								<fld ty="tid" na="ulStateGroupID" va="258111185" hn="_23111038" gn="_23111038" op="\Default Work Unit\_23111038"/>
+								<fld ty="u8" na="eStateSyncType" va="0" vf="0x00 [Immediate]"/>
+								<fld ty="var" na="ulNumStates" va="0"/>
+								<lst na="pStates" co="0"/>
+							</obj>
+						</lst>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="19">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="71765823" hn="4181829353" gn="4181829353" op="\Default Work Unit\Master Audio Bus\BGM\4181829353"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="20">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="1737926756" hn="Tower" gn="Tower" op="\Default Work Unit\Master Audio Bus\BGM\Tower"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="21">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="76" vf="0x4C"/>
+				<fld ty="sid" na="ulID" va="2331248656" hn="2450185101" gn="2450185101" op="\Default Work Unit\Master Audio Bus\BGM\2450185101"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="7"/>
+							<lst na="pProps" co="7">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-3.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="13" vf="0x0D [OutputBusVolume]"/>
+									<fld ty="uni" na="pValue" va="-3.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="1.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="6">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="0"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="0"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.30000305175781"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="22">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="2700660107" hn="stings" gn="stings" op="\Default Work Unit\Master Audio Bus\BGM\stings"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="23">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="2764240573" hn="Combat" gn="Combat" op="\Default Work Unit\Master Audio Bus\BGM\Combat"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="24">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="3389399525" hn="dioramas" gn="dioramas" op="\Default Work Unit\Master Audio Bus\BGM\dioramas"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="25">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="66" vf="0x42"/>
+				<fld ty="sid" na="ulID" va="3765803840" hn="CutScenes" gn="CutScenes" op="\Default Work Unit\Master Audio Bus\BGM\CutScenes"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="412724365" hn="BGM" gn="BGM" op="\Default Work Unit\Master Audio Bus\BGM"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="26">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="109" vf="0x6D"/>
+				<fld ty="sid" na="ulID" va="1551306167" hn="UI" gn="UI" op="\Default Work Unit\Master Audio Bus\UI"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="3803692087" hn="Master Audio Bus" gn="Master Audio Bus" op="\Default Work Unit\Master Audio Bus"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="6"/>
+							<lst na="pProps" co="6">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="4" vf="0x04 [BusVolume]"/>
+									<fld ty="uni" na="pValue" va="-10.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="5">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="1"/>
+						<lst na="pRTPCMgr" co="1">
+							<obj na="RTPC" ix="0">
+								<fld ty="tid" na="RTPCID" va="2813364820" hn="_2803734810" gn="_2803734810" op="\Default Work Unit\_2803734810"/>
+								<fld ty="u8" na="rtpcType" va="0" vf="0x00 [GameParameter]"/>
+								<fld ty="u8" na="rtpcAccum" va="2" vf="0x02 [Additive]"/>
+								<fld ty="var" na="ParamID" va="13" vf="0x0D [PlaybackSpeed]"/>
+								<fld ty="sid" na="rtpcCurveID" va="747544075"/>
+								<fld ty="u8" na="eScaling" va="2" vf="0x02 [dB]"/>
+								<fld ty="u16" na="ulSize" va="2"/>
+								<lst na="pRTPCMgr" co="2">
+									<obj na="AkRTPCGraphPoint" ix="0">
+										<fld ty="f32" na="From" va="0.0"/>
+										<fld ty="f32" na="To" va="-1.0"/>
+										<fld ty="u32" na="Interp" va="1" vf="0x01 [Sine]"/>
+									</obj>
+									<obj na="AkRTPCGraphPoint" ix="1">
+										<fld ty="f32" na="From" va="100.0"/>
+										<fld ty="f32" na="To" va="0.0"/>
+										<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+									</obj>
+								</lst>
+							</obj>
+						</lst>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkBus" ix="27">
+				<fld ty="u8" na="eHircType" va="8" vf="0x08 [Audio Bus]"/>
+				<fld ty="u32" na="dwSectionSize" va="70" vf="0x46"/>
+				<fld ty="sid" na="ulID" va="805203703" hn="Master Secondary Bus" gn="Master Secondary Bus" op="\Default Work Unit\Master Secondary Bus"/>
+				<obj na="BusInitialValues">
+					<fld ty="tid" na="OverrideBusId" va="0"/>
+					<fld ty="tid" na="idDeviceShareset" va="3859886410" hn="System" gn="System"/>
+					<obj na="BusInitialParams">
+						<obj na="AkPropBundle&lt;AkPropValue,unsigned char&gt;">
+							<fld ty="u8" na="cProps" va="5"/>
+							<lst na="pProps" co="5">
+								<obj na="AkPropBundle" ix="0">
+									<fld ty="u8" na="pID" va="27" vf="0x1B [HDRBusThreshold]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="1">
+									<fld ty="u8" na="pID" va="28" vf="0x1C [HDRBusRatio]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="2">
+									<fld ty="u8" na="pID" va="29" vf="0x1D [HDRBusReleaseTime]"/>
+									<fld ty="uni" na="pValue" va="0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="3">
+									<fld ty="u8" na="pID" va="41" vf="0x29 [Positioning_CenterPercent]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+								<obj na="AkPropBundle" ix="4">
+									<fld ty="u8" na="pID" va="63" vf="0x3F [HDRBusGameParamMax]"/>
+									<fld ty="uni" na="pValue" va="100.0"/>
+								</obj>
+							</lst>
+						</obj>
+						<obj na="PositioningParams">
+							<fld ty="u8" na="uBitsPositioning" va="1" vf="0x01">
+								<fld ty="bit0" na="bPositioningInfoOverrideParent" va="1"/>
+								<fld ty="bit1" na="bHasListenerRelativeRouting" va="0"/>
+								<fld ty="bit2" na="ePannerType" va="0" vf="0 [DirectSpeakerAssignment]"/>
+								<fld ty="bit5" na="e3DPositionType" va="0" vf="0 [Emitter]"/>
+							</fld>
+						</obj>
+						<obj na="AuxParams">
+							<fld ty="u8" na="byBitVector" va="21" vf="0x15">
+								<fld ty="bit2" na="bOverrideUserAuxSends" va="1"/>
+								<fld ty="bit3" na="bHasAux" va="0"/>
+								<fld ty="bit4" na="bOverrideReflectionsAuxBus" va="1"/>
+							</fld>
+							<fld ty="tid" na="reflectionsAuxBus" va="0"/>
+						</obj>
+						<fld ty="u8" na="byBitVector" va="0" vf="0x00">
+							<fld ty="bit0" na="bKillNewest" va="0"/>
+							<fld ty="bit1" na="bUseVirtualBehavior" va="0"/>
+							<fld ty="bit2" na="bIsMaxNumInstIgnoreParent" va="0"/>
+							<fld ty="bit3" na="bIsBackgroundMusic" va="0"/>
+						</fld>
+						<fld ty="u16" na="u16MaxNumInstance" va="0" vf="0x00"/>
+						<fld ty="u32" na="uChannelConfig" va="0" vf="0x00">
+							<fld ty="bit0" na="uNumChannels" va="0" vf="0"/>
+							<fld ty="bit8" na="eConfigType" va="0" vf="0 [Anonymous]"/>
+							<fld ty="bit12" na="uChannelMask" va="0" vf="0x00000 [None]"/>
+						</fld>
+						<fld ty="u8" na="byBitVector" va="2" vf="0x02">
+							<fld ty="bit0" na="bIsHdrBus" va="0"/>
+							<fld ty="bit1" na="bHdrReleaseModeExponential" va="1"/>
+						</fld>
+					</obj>
+					<fld ty="s32" na="RecoveryTime" va="1000"/>
+					<fld ty="f32" na="fMaxDuckVolume" va="-96.0"/>
+					<fld ty="u32" na="ulDucks" va="0"/>
+					<lst na="ToDuckList" co="0"/>
+					<obj na="BusInitialFxParams">
+						<fld ty="u8" na="uNumFx" va="0"/>
+					</obj>
+					<fld ty="u8" na="uNumFx" va="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+				</obj>
+			</obj>
+			<obj na="CAkFxCustom" ix="28">
+				<fld ty="u8" na="eHircType" va="17" vf="0x11 [Fx Custom]"/>
+				<fld ty="u32" na="dwSectionSize" va="205" vf="0xCD"/>
+				<fld ty="sid" na="ulID" va="50413142"/>
+				<obj na="FxBaseInitialValues">
+					<fld ty="u32" na="fxID" va="7733251" vf="0x00760003 [Wwise RoomVerb]">
+						<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+						<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+					</fld>
+					<fld ty="u32" na="uSize" va="186" vf="0xBA"/>
+					<obj na="AkStereoDelayFXParams">
+						<obj na="RTPCParams">
+							<fld ty="f32" na="fDecayTime" va="1.2000000476837158"/>
+							<fld ty="f32" na="fHFDamping" va="2.25"/>
+							<fld ty="f32" na="fDiffusion" va="100.0"/>
+							<fld ty="f32" na="fStereoWidth" va="180.0"/>
+							<fld ty="f32" na="fFilter1Gain" va="0.0"/>
+							<fld ty="f32" na="fFilter1Freq" va="100.0"/>
+							<fld ty="f32" na="fFilter1Q" va="1.0"/>
+							<fld ty="f32" na="fFilter2Gain" va="0.0"/>
+							<fld ty="f32" na="fFilter2Freq" va="1000.0"/>
+							<fld ty="f32" na="fFilter2Q" va="1.0"/>
+							<fld ty="f32" na="fFilter3Gain" va="0.0"/>
+							<fld ty="f32" na="fFilter3Freq" va="10000.0"/>
+							<fld ty="f32" na="fFilter3Q" va="1.0"/>
+							<fld ty="f32" na="fFrontLevel" va="0.0"/>
+							<fld ty="f32" na="fRearLevel" va="0.0"/>
+							<fld ty="f32" na="fCenterLevel" va="0.0"/>
+							<fld ty="f32" na="fLFELevel" va="-96.30000305175781"/>
+							<fld ty="f32" na="fDryLevel" va="-96.30000305175781"/>
+							<fld ty="f32" na="fERLevel" va="-20.0"/>
+							<fld ty="f32" na="fReverbLevel" va="-20.0"/>
+						</obj>
+						<obj na="InvariantParams">
+							<fld ty="u8" na="bEnableEarlyReflections" va="1" vf="0x01"/>
+							<fld ty="u32" na="uERPattern" va="23"/>
+							<fld ty="f32" na="fReverbDelay" va="25.0"/>
+							<fld ty="f32" na="fRoomSize" va="0.0"/>
+							<fld ty="f32" na="fERFrontBackDelay" va="0.0"/>
+							<fld ty="f32" na="fDensity" va="80.0"/>
+							<fld ty="f32" na="fRoomShape" va="100.0"/>
+							<fld ty="u32" na="uNumReverbUnits" va="8"/>
+							<fld ty="u8" na="bEnableToneControls" va="0" vf="0x00"/>
+							<fld ty="u32" na="eFilter1Pos" va="3" vf="0x03 [ERANDREVERB]"/>
+							<fld ty="u32" na="eFilter1Curve" va="0" vf="0x00 [LOWSHELF]"/>
+							<fld ty="u32" na="eFilter2Pos" va="3" vf="0x03 [ERANDREVERB]"/>
+							<fld ty="u32" na="eFilter2Curve" va="1" vf="0x01 [PEAKING]"/>
+							<fld ty="u32" na="eFilter3Pos" va="3" vf="0x03 [ERANDREVERB]"/>
+							<fld ty="u32" na="eFilter3Curve" va="2" vf="0x02 [HIGHSHELF]"/>
+							<fld ty="f32" na="fInputCenterLevel" va="0.0"/>
+							<fld ty="f32" na="fInputLFELevel" va="-96.30000305175781"/>
+						</obj>
+						<obj na="AlgorithmTunings">
+							<fld ty="f32" na="fDensityDelayMin" va="8.0"/>
+							<fld ty="f32" na="fDensityDelayMax" va="50.0"/>
+							<fld ty="f32" na="fDensityDelayRdmPerc" va="2.0"/>
+							<fld ty="f32" na="fRoomShapeMin" va="0.10000000149011612"/>
+							<fld ty="f32" na="fRoomShapeMax" va="0.800000011920929"/>
+							<fld ty="f32" na="fDiffusionDelayScalePerc" va="66.0"/>
+							<fld ty="f32" na="fDiffusionDelayMax" va="15.0"/>
+							<fld ty="f32" na="fDiffusionDelayRdmPerc" va="5.0"/>
+							<fld ty="f32" na="fDCFilterCutFreq" va="40.0"/>
+							<fld ty="f32" na="fReverbUnitInputDelay" va="100.0"/>
+							<fld ty="f32" na="fReverbUnitInputDelayRmdPerc" va="50.0"/>
+						</obj>
+					</obj>
+					<fld ty="u8" na="uNumBankData" va="0"/>
+					<lst na="media" co="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+					<fld ty="u16" na="numValues" va="0"/>
+					<lst na="propertyValues" co="0"/>
+				</obj>
+			</obj>
+			<obj na="CAkFxCustom" ix="29">
+				<fld ty="u8" na="eHircType" va="17" vf="0x11 [Fx Custom]"/>
+				<fld ty="u32" na="dwSectionSize" va="37" vf="0x25"/>
+				<fld ty="sid" na="ulID" va="485212956"/>
+				<obj na="FxBaseInitialValues">
+					<fld ty="u32" na="fxID" va="6946819" vf="0x006A0003 [Wwise Delay]">
+						<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+						<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+					</fld>
+					<fld ty="u32" na="uSize" va="18" vf="0x12"/>
+					<obj na="AkDelayFXParams">
+						<fld ty="f32" na="NonRTPC.fDelayTime" va="0.5"/>
+						<fld ty="f32" na="RTPC.fFeedback" va="15.0"/>
+						<fld ty="f32" na="RTPC.fWetDryMix" va="25.0"/>
+						<fld ty="f32" na="RTPC.fOutputLevel" va="0.0"/>
+						<fld ty="u8" na="RTPC.bFeedbackEnabled" va="1" vf="0x01"/>
+						<fld ty="u8" na="NonRTPC.bProcessLFE" va="1" vf="0x01"/>
+					</obj>
+					<fld ty="u8" na="uNumBankData" va="0"/>
+					<lst na="media" co="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+					<fld ty="u16" na="numValues" va="0"/>
+					<lst na="propertyValues" co="0"/>
+				</obj>
+			</obj>
+			<obj na="CAkFxShareSet" ix="30">
+				<fld ty="u8" na="eHircType" va="16" vf="0x10 [Fx Share Set]"/>
+				<fld ty="u32" na="dwSectionSize" va="41" vf="0x29"/>
+				<fld ty="sid" na="ulID" va="1459522457" hn="Brick_Wall_Minus_1dB_Peak_Fast_Release" gn="Brick_Wall_Minus_1dB_Peak_Fast_Release"/>
+				<obj na="FxBaseInitialValues">
+					<fld ty="u32" na="fxID" va="7208963" vf="0x006E0003 [Wwise Peak Limiter]">
+						<fld ty="u16" na="type" va="3" vf="0x03 [Effect]"/>
+						<fld ty="u16" na="company" va="0" vf="0x00 [Audiokinetic]"/>
+					</fld>
+					<fld ty="u32" na="uSize" va="22" vf="0x16"/>
+					<obj na="AkPeakLimiterFXParams">
+						<fld ty="f32" na="RTPC.fThreshold" va="-1.0"/>
+						<fld ty="f32" na="RTPC.fRatio" va="50.0"/>
+						<fld ty="f32" na="NonRTPC.fLookAhead" va="0.009999999776482582"/>
+						<fld ty="f32" na="RTPC.fRelease" va="0.019999999552965164"/>
+						<fld ty="f32" na="RTPC.fOutputLevel" va="0.0"/>
+						<fld ty="u8" na="NonRTPC.bProcessLFE" va="1" vf="0x01"/>
+						<fld ty="u8" na="NonRTPC.bChannelLink" va="1" vf="0x01"/>
+					</obj>
+					<fld ty="u8" na="uNumBankData" va="0"/>
+					<lst na="media" co="0"/>
+					<obj na="InitialRTPC">
+						<fld ty="u16" na="uNumCurves" va="0"/>
+						<lst na="pRTPCMgr" co="0"/>
+					</obj>
+					<obj na="StateChunk">
+						<fld ty="var" na="ulNumStateProps" va="0"/>
+						<lst na="stateProps" co="0"/>
+						<fld ty="var" na="ulNumStateGroups" va="0"/>
+						<lst na="pStateChunks" co="0"/>
+					</obj>
+					<fld ty="u16" na="numValues" va="0"/>
+					<lst na="propertyValues" co="0"/>
+				</obj>
+			</obj>
+		</lst>
+	</obj>
+	<obj na="EnvSettingsChunk">
+		<fld ty="4cc" na="dwTag" va="b&apos;ENVS&apos;" vf="b&apos;ENVS&apos; [Enviroment Settings]"/>
+		<fld ty="u32" na="dwChunkSize" va="168" vf="0xA8"/>
+		<obj na="ConversionTable">
+			<obj na="ObsOccCurve[CurveObs][CurveVol]">
+				<fld ty="u8" na="bCurveEnabled" va="1"/>
+				<fld ty="u8" na="eCurveScaling" va="2" vf="0x02 [dB]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="-1.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+			<obj na="ObsOccCurve[CurveObs][CurveLPF]">
+				<fld ty="u8" na="bCurveEnabled" va="1"/>
+				<fld ty="u8" na="eCurveScaling" va="0" vf="0x00 [None]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="100.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+			<obj na="ObsOccCurve[CurveObs][CurveHPF]">
+				<fld ty="u8" na="bCurveEnabled" va="0"/>
+				<fld ty="u8" na="eCurveScaling" va="0" vf="0x00 [None]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="100.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+			<obj na="ObsOccCurve[CurveOcc][CurveVol]">
+				<fld ty="u8" na="bCurveEnabled" va="1"/>
+				<fld ty="u8" na="eCurveScaling" va="2" vf="0x02 [dB]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="-1.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+			<obj na="ObsOccCurve[CurveOcc][CurveLPF]">
+				<fld ty="u8" na="bCurveEnabled" va="1"/>
+				<fld ty="u8" na="eCurveScaling" va="0" vf="0x00 [None]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="100.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+			<obj na="ObsOccCurve[CurveOcc][CurveHPF]">
+				<fld ty="u8" na="bCurveEnabled" va="0"/>
+				<fld ty="u8" na="eCurveScaling" va="0" vf="0x00 [None]"/>
+				<fld ty="u16" na="ulCurveSize" va="2"/>
+				<lst na="aPoints" co="2">
+					<obj na="AkRTPCGraphPoint" ix="0">
+						<fld ty="f32" na="From" va="0.0"/>
+						<fld ty="f32" na="To" va="0.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+					<obj na="AkRTPCGraphPoint" ix="1">
+						<fld ty="f32" na="From" va="100.0"/>
+						<fld ty="f32" na="To" va="100.0"/>
+						<fld ty="u32" na="Interp" va="4" vf="0x04 [Linear]"/>
+					</obj>
+				</lst>
+			</obj>
+		</obj>
+	</obj>
+	<obj na="CustomPlatformChunk">
+		<fld ty="4cc" na="dwTag" va="b&apos;PLAT&apos;" vf="b&apos;PLAT&apos; [Custom Platform]"/>
+		<fld ty="u32" na="dwChunkSize" va="8" vf="0x08"/>
+		<fld ty="stz" na="pCustomPlatformName" va="Android"/>
+	</obj>
+</root>
+</base>
+
+</doc>

@@ -1,0 +1,5 @@
+/GeneratedSoundBanks/Windows
+*.validationcache
+*.wsettings
+*.akd
+/.cache

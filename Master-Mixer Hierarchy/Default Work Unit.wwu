@@ -1,0 +1,870 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{EFA394A8-48B0-44F6-AE65-EE4D93A2F864}" SchemaVersion="119">
+	<Busses>
+		<WorkUnit Name="Default Work Unit" ID="{EFA394A8-48B0-44F6-AE65-EE4D93A2F864}" PersistMode="Standalone">
+			<ChildrenList>
+				<Bus Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}">
+					<Comment>3803692087</Comment>
+					<ReferenceList>
+						<Reference Name="AudioDevice" PluginName="System" CompanyID="0" PluginID="174" PluginType="7">
+							<ObjectRef Name="System" ID="{75EFFE1F-BF44-45BC-99A1-002D5825D732}" WorkUnitID="{C4FCB4A3-30C6-4D73-AD24-1C7D5C3AA9B5}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<Bus Name="SFX" ID="{404A2BB7-505B-468A-8F9E-1D578BF61B24}">
+							<Comment>393239870</Comment>
+							<ChildrenList>
+								<Bus Name="VFX" ID="{DA40A686-A2BA-420E-9928-1BDE54704B86}">
+									<Comment>694692527</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+								</Bus>
+								<Bus Name="Narrative" ID="{3B38FD25-9AA9-4AAC-8CA4-5890191914AB}">
+									<Comment>1047870521</Comment>
+									<StateInfo>
+										<StateGroupList>
+											<StateGroupInfo>
+												<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+											</StateGroupInfo>
+										</StateGroupList>
+										<CustomStateList>
+											<CustomState>
+												<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+												<CustomState Name="" ID="{C2D4B1FE-EEB8-42BA-B0E7-6A09AAED4300}" ShortID="344088667"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+												<CustomState Name="" ID="{89369717-099E-4FC3-82F9-A30C17F1F367}" ShortID="1037907874"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+												<CustomState Name="" ID="{7EC6491B-7742-48E6-BC89-FF7E9B62F5E4}" ShortID="345262792"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+												<CustomState Name="" ID="{D05E3FD6-CCC7-4BC4-B660-01A30DC6C516}" ShortID="836157887"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+												<CustomState Name="" ID="{9803DB76-D21E-4FEA-9FD5-E367C7F7D4F9}" ShortID="869414284"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+												<CustomState Name="" ID="{0F27AFF1-C0AC-4C0D-8764-F56219E819BD}" ShortID="752639318"/>
+											</CustomState>
+										</CustomStateList>
+									</StateInfo>
+								</Bus>
+								<Bus Name="Plants" ID="{594A659B-12F5-434C-9CB0-CF774BA2517E}">
+									<Comment>1317300247</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+								</Bus>
+								<Bus Name="Vo" ID="{3444B45D-6199-41A8-8FDE-DCEB5E05CA17}">
+									<Comment>1534528548</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-5</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<StateInfo>
+										<StateGroupList>
+											<StateGroupInfo>
+												<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+											</StateGroupInfo>
+										</StateGroupList>
+										<CustomStateList>
+											<CustomState>
+												<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+												<CustomState Name="" ID="{F9E4FF24-431B-403F-AF6D-32E84B2D209A}" ShortID="590346486"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+												<CustomState Name="" ID="{ECFC3E47-E1AD-4F25-B868-894D7BCBE7B9}" ShortID="228537243"/>
+											</CustomState>
+										</CustomStateList>
+									</StateInfo>
+								</Bus>
+								<Bus Name="Combat_Impacts" ID="{72DFC6CC-D7A2-4E20-9DF2-CF1EC9E8A91B}">
+									<Comment>2275399817</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+								</Bus>
+								<Bus Name="Meta" ID="{3189D79D-335D-4712-B69A-12FD56D3FE0A}">
+									<Comment>2976663622</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<StateInfo>
+										<StateGroupList>
+											<StateGroupInfo>
+												<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+											</StateGroupInfo>
+										</StateGroupList>
+										<CustomStateList>
+											<CustomState>
+												<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+												<CustomState Name="" ID="{41B09364-4D72-428E-9BFD-78D52A9056C2}" ShortID="671320424"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+												<CustomState Name="" ID="{FC00B5F3-9255-4F54-9F6A-C172C66D3DC3}" ShortID="311433223"/>
+											</CustomState>
+										</CustomStateList>
+									</StateInfo>
+								</Bus>
+								<Bus Name="Zombies" ID="{0B3AA4E9-411D-4E22-B96B-B1B5780D66B2}">
+									<Comment>4113933398</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+								</Bus>
+								<Bus Name="2914240860" ID="{BE83D6F7-9097-4297-B35B-00A4D9C82A01}">
+									<Comment>2914240860</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-10</Value>
+											</ValueList>
+										</Property>
+										<Property Name="RecoveryTime" Type="Real64" Value="0"/>
+									</PropertyList>
+									<StateInfo>
+										<StateGroupList>
+											<StateGroupInfo>
+												<StateGroupRef Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}"/>
+											</StateGroupInfo>
+											<StateGroupInfo>
+												<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+											</StateGroupInfo>
+											<StateGroupInfo>
+												<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+											</StateGroupInfo>
+										</StateGroupList>
+										<CustomStateList>
+											<CustomState>
+												<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+												<CustomState Name="" ID="{959C8342-6033-40AD-8FC8-EB33BA2EDF31}" ShortID="1069730697"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+												<CustomState Name="" ID="{EA2CB30D-7110-4810-A274-F9643B6EEB03}" ShortID="820424902"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+												<CustomState Name="" ID="{FBAFED0F-97A1-436D-9549-64580D0DEB19}" ShortID="639231185"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+												<CustomState Name="" ID="{4706A95B-4383-4934-8FA2-4F116433AD9C}" ShortID="1037946203"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+												<CustomState Name="" ID="{14DABC14-B417-4383-954B-79463FF944F2}" ShortID="301476936"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+												<CustomState Name="" ID="{F63D4A76-2AD9-4AEA-947F-1DE86D78D4A2}" ShortID="869962137">
+													<PropertyList>
+														<Property Name="BusVolume" Type="Real64" Value="-12"/>
+													</PropertyList>
+												</CustomState>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+												<CustomState Name="" ID="{33D3968A-5899-4527-8487-6BF77437C518}" ShortID="767216345">
+													<PropertyList>
+														<Property Name="BusVolume" Type="Real64" Value="-12"/>
+													</PropertyList>
+												</CustomState>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}"/>
+												<CustomState Name="" ID="{1AB0203E-8ADB-48C3-928C-3107D9BDD945}" ShortID="1051191919">
+													<PropertyList>
+														<Property Name="BusVolume" Type="Real64" Value="-96"/>
+													</PropertyList>
+												</CustomState>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+												<CustomState Name="" ID="{1AF9B645-1BAD-49E2-8A15-9C0D0CA68151}" ShortID="379079911"/>
+											</CustomState>
+											<CustomState>
+												<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+												<CustomState Name="" ID="{61480E0D-162D-4871-AFA0-64ACECAF5C8D}" ShortID="320533460">
+													<PropertyList>
+														<Property Name="BusVolume" Type="Real64" Value="-96"/>
+													</PropertyList>
+												</CustomState>
+											</CustomState>
+										</CustomStateList>
+									</StateInfo>
+								</Bus>
+								<Bus Name="2269110654" ID="{1E75D985-D5D5-43CB-9D2F-307C014F0E7E}">
+									<Comment>2269110654</Comment>
+									<ChildrenList>
+										<Bus Name="2859982272" ID="{48C5BD64-5891-47D0-9C73-4C4C14AD3F82}">
+											<Comment>2859982272</Comment>
+											<PropertyList>
+												<Property Name="RecoveryTime" Type="Real64" Value="0"/>
+											</PropertyList>
+											<StateInfo>
+												<StateGroupList>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}"/>
+													</StateGroupInfo>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+													</StateGroupInfo>
+													<StateGroupInfo>
+														<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+													</StateGroupInfo>
+												</StateGroupList>
+												<CustomStateList>
+													<CustomState>
+														<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+														<CustomState Name="" ID="{9D4CC07C-164D-49D9-80E2-EF0A1396E51A}" ShortID="211658122"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+														<CustomState Name="" ID="{5DE6EDCE-FD4E-4784-A2A1-32705D414EEC}" ShortID="818630879"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+														<CustomState Name="" ID="{E00FC19C-9B0E-4F6D-B64E-D5F8F80AA841}" ShortID="736498113"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+														<CustomState Name="" ID="{E1D27F7D-4A8D-4EE3-B770-A97EF1F3C11A}" ShortID="306705766"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+														<CustomState Name="" ID="{8ECE09D9-6F61-463C-AA8C-FC302AFA8324}" ShortID="1069633719"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+														<CustomState Name="" ID="{FC88C2A0-CCC0-41ED-993E-8A5541E0028F}" ShortID="267354291">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-12"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+														<CustomState Name="" ID="{5419D31E-4BAB-4BF4-BBC8-A74B17C40FD1}" ShortID="630388981">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-12"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}"/>
+														<CustomState Name="" ID="{668F00CE-2181-4D2C-AA47-789B55DAD8D2}" ShortID="119035851">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-96"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+														<CustomState Name="" ID="{694B2926-17D0-473D-BD70-C5A5E7B2CA62}" ShortID="326719230"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+														<CustomState Name="" ID="{60625CF3-0A2E-41DF-9D12-06D6AF4D8400}" ShortID="533457540">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-96"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+												</CustomStateList>
+											</StateInfo>
+										</Bus>
+										<Bus Name="Ambience_map" ID="{EDD62FA5-8D91-4806-9244-BC3647321C95}">
+											<Comment>105317894</Comment>
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64">
+													<ValueList>
+														<Value>-10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="RecoveryTime" Type="Real64" Value="0"/>
+											</PropertyList>
+											<StateInfo>
+												<StateGroupList>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}"/>
+													</StateGroupInfo>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+													</StateGroupInfo>
+													<StateGroupInfo>
+														<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+													</StateGroupInfo>
+												</StateGroupList>
+												<CustomStateList>
+													<CustomState>
+														<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+														<CustomState Name="" ID="{B01E4AD4-A520-4BC4-8947-D137709BB3A5}" ShortID="55626481"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+														<CustomState Name="" ID="{41F363C3-4C58-4592-883F-4E5C4DA58F88}" ShortID="542432154"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+														<CustomState Name="" ID="{CF56D366-7848-4D00-A192-954CD5E9A3F8}" ShortID="976727070"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+														<CustomState Name="" ID="{E7F05D23-3578-4340-91D8-CD70219C3E62}" ShortID="485575215"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+														<CustomState Name="" ID="{ECBA831E-202E-4DAE-95F1-6DEA901F5B3D}" ShortID="651287735"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+														<CustomState Name="" ID="{691F3FDF-ECE8-40D8-971D-32E62BD0FF16}" ShortID="49007681">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-12"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+														<CustomState Name="" ID="{2EE6167C-D844-47E0-98F5-393DA236647B}" ShortID="715140938">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-12"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}"/>
+														<CustomState Name="" ID="{20B5685D-1197-4A2F-A914-755836D8865F}" ShortID="483506344">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-96"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+														<CustomState Name="" ID="{89E94AA2-B43B-4F15-A085-D688711ED4CA}" ShortID="219905267"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+														<CustomState Name="" ID="{7C33AF0A-BBF3-47C8-8560-23F864D291EF}" ShortID="360755059">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-96"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+												</CustomStateList>
+											</StateInfo>
+										</Bus>
+										<Bus Name="4168582764" ID="{BEC0B5DF-B4FF-408F-8504-10E482AE1B92}">
+											<StateInfo>
+												<StateGroupList>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+													</StateGroupInfo>
+													<StateGroupInfo>
+														<StateGroupRef Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}"/>
+													</StateGroupInfo>
+												</StateGroupList>
+												<CustomStateList>
+													<CustomState>
+														<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+														<CustomState Name="" ID="{17CD7776-6826-4214-BA5F-1362282EE7D7}" ShortID="835513164"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+														<CustomState Name="" ID="{EA49D752-B443-44F9-AC9D-9AA31325C6D2}" ShortID="283214691"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+														<CustomState Name="" ID="{B95ECD7B-71B6-4912-A0F9-ECEE8D7BA755}" ShortID="909094197"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+														<CustomState Name="" ID="{A562E71C-6C0B-48A8-9A6C-2DCFB99E6D50}" ShortID="778075233"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+														<CustomState Name="" ID="{5D9767EA-921F-454B-9284-BFFA165E2CD6}" ShortID="922729426"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}"/>
+														<CustomState Name="" ID="{489F8D8A-9F45-4626-99EB-583977139286}" ShortID="68867251">
+															<PropertyList>
+																<Property Name="BusVolume" Type="Real64" Value="-96"/>
+															</PropertyList>
+														</CustomState>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+														<CustomState Name="" ID="{4F99CD36-1FA5-4E80-A51B-CF5003061E3B}" ShortID="631926337"/>
+													</CustomState>
+													<CustomState>
+														<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+														<CustomState Name="" ID="{B51F9C8D-1CBE-4A2B-898B-E4567C982A00}" ShortID="285756087"/>
+													</CustomState>
+												</CustomStateList>
+											</StateInfo>
+										</Bus>
+									</ChildrenList>
+								</Bus>
+							</ChildrenList>
+							<ObjectLists>
+								<ObjectList Name="RTPC">
+									<Reference>
+										<Local>
+											<RTPC Name="" ID="{E7678896-3BDC-47E5-85CB-DC57861C711C}" ShortID="492495379">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="OutputBusVolume"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="ControlInput">
+														<ObjectRef Name="_2803734810" ID="{BA613A68-A69A-408C-9AAD-C928A4DC0EDA}" WorkUnitID="{DBC2A4A9-623D-4FF5-82CF-B7380FBB65FF}"/>
+													</Reference>
+													<Reference Name="Curve">
+														<Custom>
+															<Curve Name="" ID="{9628D5B0-D7D1-4D0B-BF51-217A2018EC3B}">
+																<PropertyList>
+																	<Property Name="Flags" Type="int32" Value="3"/>
+																</PropertyList>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-200</YPos>
+																		<Flags>5</Flags>
+																		<SegmentShape>Log2</SegmentShape>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</RTPC>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</Bus>
+						<Bus Name="BGM" ID="{A0FE8E2E-1C8B-4747-8E17-E8C6C6D2EB53}">
+							<Comment>412724365</Comment>
+							<PropertyList>
+								<Property Name="RecoveryTime" Type="Real64" Value="0"/>
+								<Property Name="UsedForBackgroundMusic" Type="bool" Value="True"/>
+							</PropertyList>
+							<ChildrenList>
+								<Bus Name="Tower" ID="{F747E2E1-A3FF-4283-A185-C8A0D78A30F6}">
+									<Comment>1737926756</Comment>
+								</Bus>
+								<Bus Name="stings" ID="{4E64DE89-988F-4CCC-B10A-FE4C6BC44C08}">
+									<Comment>2700660107</Comment>
+								</Bus>
+								<Bus Name="Combat" ID="{66BE7918-2F61-4883-BA50-E13E6FE8B5A2}">
+									<Comment>2764240573</Comment>
+								</Bus>
+								<Bus Name="dioramas" ID="{A27B5028-6E22-46DF-B565-5BD482B5C394}">
+									<Comment>3389399525</Comment>
+								</Bus>
+								<Bus Name="CutScenes" ID="{2A4B69B6-4A3B-4FAF-B719-DF28810FEE51}">
+									<Comment>3765803840</Comment>
+								</Bus>
+								<Bus Name="4181829353" ID="{F3B8930A-0794-44A1-8D3C-217565469992}">
+									<Comment>4181829353</Comment>
+								</Bus>
+								<Bus Name="2450185101" ID="{2F5FCE91-5149-4E3C-BDF7-1C5D3720D5E9}">
+									<Comment>2450185101</Comment>
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64">
+											<ValueList>
+												<Value>-3</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HdrRatio" Type="Real64">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HdrReleaseTimeMode" Type="int16">
+											<ValueList>
+												<Value>0</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MaxDuckVolume" Type="Real64" Value="-96.3"/>
+										<Property Name="OutputBusVolume" Type="Real64">
+											<ValueList>
+												<Value>-3</Value>
+											</ValueList>
+										</Property>
+										<Property Name="RecoveryTime" Type="Real64" Value="0"/>
+									</PropertyList>
+								</Bus>
+							</ChildrenList>
+							<StateInfo>
+								<StateGroupList>
+									<StateGroupInfo>
+										<StateGroupRef Name="_1574102113" ID="{67E5117D-A7E9-4642-AEA6-8FB0FFFAD7AF}"/>
+									</StateGroupInfo>
+									<StateGroupInfo>
+										<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+									</StateGroupInfo>
+									<StateGroupInfo>
+										<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+									</StateGroupInfo>
+								</StateGroupList>
+								<CustomStateList>
+									<CustomState>
+										<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+										<CustomState Name="" ID="{9F53748D-B6C4-4D49-B51E-7C4606A15F04}" ShortID="24688292"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+										<CustomState Name="" ID="{3C7A1B79-ADD4-4731-BEFC-56C3D6F13BD7}" ShortID="693047349">
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64" Value="-12"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+										<CustomState Name="" ID="{327FD15E-A06C-4843-AC0E-4253B1FEE200}" ShortID="1036267441"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="None" ID="{3E4C9D6D-755A-44C0-B68E-2685BA9687EA}"/>
+										<CustomState Name="" ID="{C61CCB84-D2A5-4E28-9C77-EA96F88F0E93}" ShortID="561009697"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+										<CustomState Name="" ID="{3330EFED-D6E1-4729-B735-9A69B465BE43}" ShortID="43831309"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+										<CustomState Name="" ID="{605726E6-E93F-482E-847D-BDCF5DEC64B0}" ShortID="239562664">
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64" Value="-12"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+										<CustomState Name="" ID="{B28EC709-C1C5-4A0D-AAB2-A15E9B9C9202}" ShortID="286989974">
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64" Value="-12"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="ON" ID="{92917267-3D13-4B65-A6C4-C97B192575DA}"/>
+										<CustomState Name="" ID="{2B9AB5F0-8B23-42E7-A610-0DC8273BE848}" ShortID="611001122">
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64" Value="-96"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+										<CustomState Name="" ID="{B413DB26-C51B-4FA0-9B1B-7DE374F255EB}" ShortID="766860682"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+										<CustomState Name="" ID="{23537637-89D1-41D1-B72D-440221CEFEC2}" ShortID="906092797">
+											<PropertyList>
+												<Property Name="BusVolume" Type="Real64" Value="-96"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+								</CustomStateList>
+							</StateInfo>
+							<ObjectLists>
+								<ObjectList Name="RTPC">
+									<Reference>
+										<Local>
+											<RTPC Name="" ID="{C61EB52E-A72D-4DE0-AE0A-09E83235B032}" ShortID="601094077">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="OutputBusVolume"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="ControlInput">
+														<ObjectRef Name="_2350240842" ID="{D2A1E818-74F2-4DA3-B792-EC2A67FB792B}" WorkUnitID="{DBC2A4A9-623D-4FF5-82CF-B7380FBB65FF}"/>
+													</Reference>
+													<Reference Name="Curve">
+														<Custom>
+															<Curve Name="" ID="{3A791208-B7AF-41D2-BECE-04EFAA693DD2}">
+																<PropertyList>
+																	<Property Name="Flags" Type="int32" Value="3"/>
+																</PropertyList>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-200</YPos>
+																		<Flags>5</Flags>
+																		<SegmentShape>Log2</SegmentShape>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</RTPC>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</Bus>
+						<Bus Name="UI" ID="{79A7CF77-BB0E-49E3-8B59-D7BD8EFAC7C0}">
+							<Comment>1551306167</Comment>
+							<PropertyList>
+								<Property Name="BusVolume" Type="Real64">
+									<ValueList>
+										<Value>-10</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ObjectLists>
+								<ObjectList Name="RTPC">
+									<Reference>
+										<Local>
+											<RTPC Name="" ID="{1B028566-09E8-4D7C-B6BD-DDA3A63930DE}" ShortID="747544075">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="OutputBusVolume"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="ControlInput">
+														<ObjectRef Name="_2803734810" ID="{BA613A68-A69A-408C-9AAD-C928A4DC0EDA}" WorkUnitID="{DBC2A4A9-623D-4FF5-82CF-B7380FBB65FF}"/>
+													</Reference>
+													<Reference Name="Curve">
+														<Custom>
+															<Curve Name="" ID="{0E317B24-CBA5-4BA5-949F-7A1B785B444B}">
+																<PropertyList>
+																	<Property Name="Flags" Type="int32" Value="3"/>
+																</PropertyList>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-200</YPos>
+																		<Flags>5</Flags>
+																		<SegmentShape>Log2</SegmentShape>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</RTPC>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</Bus>
+						<AuxBus Name="Reverb" ID="{6DD9BCE7-1667-4A54-849A-FFC72BF6D43E}">
+							<Comment>348963605</Comment>
+							<PropertyList>
+								<Property Name="BypassEffect" Type="bool">
+									<ValueList>
+										<Value>True</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ObjectLists>
+								<ObjectList Name="Effects">
+									<Reference>
+										<Local>
+											<EffectSlot Name="" ID="{65BCF28E-2D25-48AD-BB87-A8FD47B98FA4}" ShortID="312659076">
+												<PropertyList>
+													<Property Name="Bypass" Type="bool" Value="True"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="Effect">
+														<Custom>
+															<Effect Name="RoomVerb (Custom)" ID="{BCC5EC6D-B5DD-4BE9-9D40-C32F2CFD2FCD}" ShortID="50413142" PluginName="Wwise RoomVerb" CompanyID="0" PluginID="118" PluginType="3"/>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</EffectSlot>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</AuxBus>
+						<AuxBus Name="Delay" ID="{631939B7-8950-4E28-8336-FF15C9F2B7DB}">
+							<Comment>357718954</Comment>
+							<ObjectLists>
+								<ObjectList Name="Effects">
+									<Reference>
+										<Local>
+											<EffectSlot Name="" ID="{75A30E97-0897-49EF-AEA8-C65C3ACAC616}" ShortID="314462659">
+												<ReferenceList>
+													<Reference Name="Effect">
+														<Custom>
+															<Effect Name="Delay (Custom)" ID="{4668098C-5CE1-4170-8D1D-68CC3F24398A}" ShortID="485212956" PluginName="Wwise Delay" CompanyID="0" PluginID="106" PluginType="3"/>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</EffectSlot>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</AuxBus>
+					</ChildrenList>
+					<StateInfo>
+						<StateGroupList>
+							<StateGroupInfo>
+								<StateGroupRef Name="_1252603985" ID="{5064FFDF-2479-4BF4-BBA7-56C07566FA74}"/>
+							</StateGroupInfo>
+							<StateGroupInfo>
+								<StateGroupRef Name="_23111038" ID="{35E98D41-BAB6-4A2C-A477-89F9BC866C42}"/>
+							</StateGroupInfo>
+						</StateGroupList>
+						<CustomStateList>
+							<CustomState>
+								<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+								<CustomState Name="" ID="{CF33C804-DB9E-4221-81A1-9A8DB2AADDFC}" ShortID="256490049"/>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+								<CustomState Name="" ID="{E2CC8C6C-90B9-4940-95DC-A5AD1222381B}" ShortID="168705190"/>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+								<CustomState Name="" ID="{F1221466-1FDC-43D5-B97E-0F30BF9927A2}" ShortID="100192670"/>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+								<CustomState Name="" ID="{2A239AC8-3065-4AB4-8623-20401DF4DD69}" ShortID="811568955">
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64" Value="-96"/>
+									</PropertyList>
+								</CustomState>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+								<CustomState Name="" ID="{53DA46B5-9D71-42B5-B91F-5F575146FDFC}" ShortID="1014880110"/>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+								<CustomState Name="" ID="{984FBC3D-1E15-450A-B19A-3271D94A6932}" ShortID="346197847"/>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+								<CustomState Name="" ID="{7227A3DD-7FF1-4C52-8C75-392C1F3A2B89}" ShortID="881099490">
+									<PropertyList>
+										<Property Name="BusVolume" Type="Real64" Value="-12"/>
+									</PropertyList>
+								</CustomState>
+							</CustomState>
+							<CustomState>
+								<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+								<CustomState Name="" ID="{B215104F-4AAB-44AE-9125-9BDAAE768A88}" ShortID="5225544"/>
+							</CustomState>
+						</CustomStateList>
+					</StateInfo>
+					<ObjectLists>
+						<ObjectList Name="Effects">
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{0C3410CF-31AB-4240-AC7E-8C3D3F5CBD0C}" ShortID="147606217">
+										<ReferenceList>
+											<Reference Name="Effect" PluginName="Wwise Peak Limiter" CompanyID="0" PluginID="110" PluginType="3">
+												<ObjectRef Name="Brick_Wall_Minus_1dB_Peak_Fast_Release" ID="{2144284E-7ADD-4341-86A4-4E468BEC9A2D}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+											</Reference>
+										</ReferenceList>
+										<StateInfo>
+											<CustomStateList>
+												<CustomState>
+													<StateRef Name="None" ID="{5B7B00C4-86F1-4174-B3D5-C442E621DA04}"/>
+													<CustomState Name="" ID="{59D1A83C-75B4-48AD-9ECB-0604653247EC}" ShortID="585531978"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="_2060081664" ID="{6C3FE2A3-024D-4323-ABCB-B3D38E69ED18}"/>
+													<CustomState Name="" ID="{CF3C07F3-037C-4F78-9EB5-88608040A4C0}" ShortID="675141177"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="None" ID="{AD90A3F7-88A1-435F-8A2C-0AE437293BF3}"/>
+													<CustomState Name="" ID="{B0020350-17F0-4CDB-A77A-9B6021581688}" ShortID="479724825"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="Muted" ID="{7BEBBF6E-E117-4600-9289-E1D11634FD3E}"/>
+													<CustomState Name="" ID="{726402B9-760B-43BA-8FEF-B4A387D86BA0}" ShortID="74196732"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="_4113309430" ID="{BF38FF0E-67D8-4739-B44A-206FD69F4835}"/>
+													<CustomState Name="" ID="{AF72C2D8-5338-4CE9-9900-C223C2155C47}" ShortID="718582127"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="Store" ID="{01ED89B9-8802-4A2C-BDA4-3F5D260E2B65}"/>
+													<CustomState Name="" ID="{4C54F68B-FA03-4758-98EF-09053D125FFF}" ShortID="943992063"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="_2392706382" ID="{A1EBECAD-0708-4C88-8AB6-28C879EFC87D}"/>
+													<CustomState Name="" ID="{76C0E035-A6CE-426C-A712-5BC1E5535AC6}" ShortID="635816983"/>
+												</CustomState>
+												<CustomState>
+													<StateRef Name="arena" ID="{4EE467CC-261F-4C9E-B33B-A9465298FBAB}"/>
+													<CustomState Name="" ID="{324DC898-AC7D-44D1-9634-21899EF5FE7E}" ShortID="881246383"/>
+												</CustomState>
+											</CustomStateList>
+										</StateInfo>
+									</EffectSlot>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
+				</Bus>
+				<Bus Name="Master Secondary Bus" ID="{21CC26A1-7A58-4E4B-96B4-C227D1D2146D}">
+					<Comment>805203703</Comment>
+					<ReferenceList>
+						<Reference Name="AudioDevice" PluginName="System" CompanyID="0" PluginID="174" PluginType="7">
+							<ObjectRef Name="System" ID="{75EFFE1F-BF44-45BC-99A1-002D5825D732}" WorkUnitID="{C4FCB4A3-30C6-4D73-AD24-1C7D5C3AA9B5}"/>
+						</Reference>
+					</ReferenceList>
+				</Bus>
+			</ChildrenList>
+		</WorkUnit>
+	</Busses>
+</WwiseDocument>
